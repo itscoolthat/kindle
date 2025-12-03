@@ -6,195 +6,177 @@
     <title>Kindle学习台</title>
     <style>
         /* --- 全局重置 --- */
-        * { box-sizing: border-box; } 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: black;
+        html, body {
             margin: 0;
             padding: 0;
-            height: 100vh;
-            overflow: hidden; /* 禁止页面滚动 */
-        }
-        
-        .hidden { display: none !important; }
-
-        /* --- 首页：绝对定位布局 --- */
-        #home-page {
             width: 100%;
             height: 100%;
-            position: relative;
-        }
-
-        /* 上部：时间区 (60%) */
-        .time-section {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            /* 弹性盒子让内容完美居中 */
-            display: -webkit-flex; /* 兼容旧版 WebKit */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* 垂直居中 */
-            align-items: center;     /* 水平居中 */
-            border-bottom: 3px solid black; /* 分割线 */
-        }
-
-        #clock-display {
-            font-size: 100px; /* 超大时间 */
-            font-weight: bold;
-            line-height: 1;
-            margin: 0;
-        }
-        
-        #date-display {
-            font-size: 20px;
-            margin-top: 15px;
-            letter-spacing: 2px;
-        }
-
-        /* 下部：按钮区 (40%) - 吸附底部 */
-        .menu-section {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-        }
-
-        /* 按钮样式：田字格铺满 */
-        .menu-btn {
-            float: left; /* 这种写法在老浏览器最稳 */
-            width: 50%;
-            height: 50%; /* 高度占下方区域的一半 */
-            
-            /* 居中文字 */
-            display: -webkit-flex;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            
-            font-size: 26px;
-            font-weight: bold;
+            overflow: hidden; /* 禁止滚动条 */
+            background-color: white;
             color: black;
-            background: white;
-            
-            /* 边框处理：让它们看起来像表格 */
-            border-right: 1px solid black;
-            border-bottom: 1px solid black;
-            text-decoration: none;
-            cursor: pointer;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 隐藏功能 */
+        .hidden { display: none !important; }
+
+        /* --- 首页：表格布局 (最稳妥) --- */
+        table.main-layout {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse; /* 去除格间距 */
+            table-layout: fixed; /* 固定列宽 */
+        }
+
+        /* 时间区域：占总高度的 60% */
+        .row-time {
+            height: 60%;
+            border-bottom: 3px solid black;
         }
         
-        /* 去除最右侧和最底部的多余边框 */
-        .menu-btn:nth-child(2n) { border-right: none; }
-        .menu-btn:nth-child(3), .menu-btn:nth-child(4) { border-bottom: none; }
+        /* 按钮区域：两行，每行占 20% (总共40%) */
+        .row-btn {
+            height: 20%;
+        }
 
-        .menu-btn:active {
+        /* 单元格通用样式 */
+        td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+
+        /* 按钮样式 */
+        .btn-cell {
+            border-bottom: 1px solid black;
+            border-right: 1px solid black;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            background: white;
+        }
+        
+        /* 按下效果 */
+        .btn-cell:active {
             background: black;
             color: white;
         }
 
-        /* --- 子页面样式 (带返回键) --- */
-        .page-container {
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+        /* 去掉最右边和最底边的线，看起来更整齐 */
+        .no-right { border-right: none; }
+        .no-bottom { border-bottom: none; }
+
+        /* 时间字体 */
+        #clock-display {
+            font-size: 90px; /* 稍微调小一点点以防撑爆 */
+            font-weight: bold;
+            line-height: 1;
+        }
+        #date-display {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        /* --- 子页面样式 --- */
+        .sub-page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            z-index: 10;
         }
         
-        /* 顶部返回条 */
-        .back-bar {
-            width: 100%;
+        .nav-bar {
             height: 50px;
             line-height: 50px;
             background: black;
             color: white;
-            padding-left: 20px;
             font-size: 20px;
+            padding-left: 15px;
             font-weight: bold;
             cursor: pointer;
         }
 
-        /* 内容区垂直居中 */
-        .content-center {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .content-box {
+            padding: 20px;
+            text-align: center;
         }
 
-        /* 页面内的元素大字 */
-        #timer-val { font-size: 100px; font-weight: bold; margin: 20px 0; }
-        #lucky-result { font-size: 60px; font-weight: bold; margin: 20px; padding: 20px; border: 4px solid black;}
-        #word-text { font-size: 70px; font-weight: bold; }
-        #pinyin-char { font-size: 140px; font-weight: bold; }
-        
+        /* 功能大字 */
+        #timer-val { font-size: 90px; font-weight: bold; margin: 30px 0; }
+        #lucky-result { font-size: 50px; margin: 40px auto; padding: 20px; border: 3px dashed black; width: 80%; }
+        #word-text { font-size: 60px; font-weight: bold; margin-top: 30px; }
+        #pinyin-char { font-size: 120px; font-weight: bold; margin-top: 30px; }
+
         .ctrl-btn {
-            font-size: 24px;
-            padding: 15px 40px;
+            font-size: 22px;
+            padding: 10px 25px;
             border: 3px solid black;
             background: white;
-            margin: 10px;
-            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div id="home-page">
-        <div class="time-section">
-            <div id="clock-display">00:00</div>
-            <div id="date-display">...</div>
-        </div>
-
-        <div class="menu-section">
-            <div class="menu-btn" onclick="showPage('page-timer')">专注闹钟</div>
-            <div class="menu-btn" onclick="showPage('page-lucky')">随机干啥</div>
-            <div class="menu-btn" onclick="showPage('page-word')">每日单词</div>
-            <div class="menu-btn" onclick="showPage('page-pinyin')">韵母练习</div>
-        </div>
+    <div id="home-page" style="width:100%; height:100%;">
+        <table class="main-layout">
+            <tr class="row-time">
+                <td colspan="2">
+                    <div id="clock-display">00:00</div>
+                    <div id="date-display">正在加载...</div>
+                </td>
+            </tr>
+            
+            <tr class="row-btn">
+                <td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td>
+                <td class="btn-cell no-right" onclick="showPage('page-lucky')">随机干啥</td>
+            </tr>
+            
+            <tr class="row-btn">
+                <td class="btn-cell no-bottom" onclick="showPage('page-word')">每日单词</td>
+                <td class="btn-cell no-right no-bottom" onclick="showPage('page-pinyin')">韵母练习</td>
+            </tr>
+        </table>
     </div>
 
-    <div id="page-timer" class="hidden page-container">
-        <div class="back-bar" onclick="goHome()"> < 返回 </div>
-        <div class="content-center">
+    <div id="page-timer" class="hidden sub-page">
+        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
+        <div class="content-box">
             <div style="font-size: 24px;">专注倒计时</div>
             <div id="timer-val">25:00</div>
-            <div>
-                <button class="ctrl-btn" onclick="startTimer()">开始</button>
-                <button class="ctrl-btn" onclick="resetTimer()">重置</button>
-            </div>
+            <button class="ctrl-btn" onclick="startTimer()">开始</button>
+            <button class="ctrl-btn" onclick="resetTimer()">重置</button>
         </div>
     </div>
 
-    <div id="page-lucky" class="hidden page-container">
-        <div class="back-bar" onclick="goHome()"> < 返回 </div>
-        <div class="content-center">
+    <div id="page-lucky" class="hidden sub-page">
+        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
+        <div class="content-box">
             <div style="font-size: 24px;">今天干点啥？</div>
             <div id="lucky-result">?</div>
             <button class="ctrl-btn" style="width: 80%" onclick="drawLucky()">开始抽签</button>
         </div>
     </div>
 
-    <div id="page-word" class="hidden page-container">
-        <div class="back-bar" onclick="goHome()"> < 返回 </div>
-        <div class="content-center">
+    <div id="page-word" class="hidden sub-page">
+        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
+        <div class="content-box">
             <div id="word-text">...</div>
-            <div id="word-phonetic" style="font-size: 28px; margin: 20px;">...</div>
-            <div id="word-sentence" style="font-size: 24px; padding: 0 20px; font-style: italic;">...</div>
+            <div id="word-phonetic" style="font-size: 28px; color: #555; margin: 20px;">...</div>
+            <div id="word-sentence" style="font-size: 22px; font-style: italic;">...</div>
         </div>
     </div>
 
-    <div id="page-pinyin" class="hidden page-container">
-        <div class="back-bar" onclick="goHome()"> < 返回 </div>
-        <div class="content-center">
+    <div id="page-pinyin" class="hidden sub-page">
+        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
+        <div class="content-box">
             <div id="pinyin-char">a</div>
             <div id="pinyin-hint" style="font-size: 30px; margin-top: 20px;">张大嘴巴 a a a</div>
-            <div style="margin-top: 50px;">
+            <div style="margin-top: 40px;">
                 <button class="ctrl-btn" onclick="prevPinyin()">上一个</button>
                 <button class="ctrl-btn" onclick="nextPinyin()">下一个</button>
             </div>
@@ -202,8 +184,9 @@
     </div>
 
     <script>
-        // --- 逻辑代码 (和之前完全一样，不需要改动逻辑) ---
+        // --- 逻辑代码 (保持功能不变) ---
 
+        // 1. 时钟
         function updateClock() {
             var now = new Date();
             var h = now.getHours();
@@ -220,24 +203,22 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        // 2. 页面切换
         function goHome() {
-            hideAll();
+            var pages = ['page-timer', 'page-lucky', 'page-word', 'page-pinyin'];
+            for(var i=0; i<pages.length; i++) {
+                document.getElementById(pages[i]).className = 'hidden sub-page';
+            }
             document.getElementById('home-page').className = '';
         }
         
         function showPage(id) {
-            hideAll();
-            document.getElementById(id).className = 'page-container';
+            document.getElementById('home-page').className = 'hidden';
+            document.getElementById(id).className = 'sub-page'; // 显示子页面
             if(id === 'page-word') loadDailyWord();
         }
-        
-        function hideAll() {
-            var pages = ['home-page', 'page-timer', 'page-lucky', 'page-word', 'page-pinyin'];
-            for (var i = 0; i < pages.length; i++) {
-                document.getElementById(pages[i]).className = 'hidden';
-            }
-        }
 
+        // 3. 倒计时
         var timerInterval = null, timeLeft = 1500, isRunning = false;
         function updateTimerDisplay() {
             var m = Math.floor(timeLeft / 60);
@@ -257,6 +238,7 @@
         function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
         function resetTimer() { pauseTimer(); timeLeft = 1500; updateTimerDisplay(); }
 
+        // 4. 抽签
         var luckyOptions = ["读绘本", "做深蹲", "背单词", "发呆", "画画"];
         function drawLucky() {
             var box = document.getElementById('lucky-result');
@@ -270,6 +252,7 @@
             }, 200);
         }
 
+        // 5. 单词
         var wordDb = [
             {t:"Cat", p:"/kæt/", s:"The cat is sleeping."},    
             {t:"Apple", p:"/æpl/", s:"I like apples."},         
@@ -287,6 +270,7 @@
             document.getElementById('word-sentence').innerHTML = w.s;
         }
 
+        // 6. 韵母
         var pinyinData = [{char:"a", hint:"张大嘴巴 a a a"}, {char:"o", hint:"公鸡打鸣 o o o"}, {char:"e", hint:"大白鹅 e e e"}, {char:"i", hint:"一件衣服 i i i"}, {char:"u", hint:"一只乌龟 u u u"}, {char:"ü", hint:"小鱼吐泡 ü ü ü"}];
         var pIndex = 0;
         function updatePinyin() {
