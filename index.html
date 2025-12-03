@@ -5,128 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
     <style>
-        /* --- 1. 全局重置 --- */
+        /* --- 1. 全局基础设置 --- */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: white; color: black;
+            overflow: hidden; /* 禁止滚动 */
+            background-color: white; color: black;
             font-family: Arial, sans-serif;
         }
+        /* 隐藏元素的通用类 */
         .hidden { display: none !important; }
-
-        /* --- 2. 首页表格布局 --- */
-        table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
-        .row-time { height: 60%; border-bottom: 3px solid black; }
-        .row-btn { height: 20%; }
+        /* 表格单元格通用对齐 */
         td { text-align: center; vertical-align: middle; padding: 0; }
+        
+        /* --- 2. 首页布局 (表格) --- */
+        table.main-layout {
+            width: 100%; height: 100%;
+            border-collapse: collapse; /* 合并边框 */
+            table-layout: fixed; /* 固定列宽 */
+        }
+        /* 首页时间行 (60%高度) */
+        .row-home-time { height: 60%; border-bottom: 3px solid black; }
+        /* 首页按钮行 (20%高度) */
+        .row-home-btn { height: 20%; }
 
+        /* --- 3. 专注闹钟页布局 (嵌套表格) --- */
+        /* 外层大表格 (分上下7:3) */
+        table.timer-layout {
+            width: 100%; height: 100%;
+            border-collapse: collapse; table-layout: fixed;
+        }
+        /* 上半部分：显示区 (70%) */
+        .row-timer-display { height: 70%; }
+        /* 下半部分：控制区 (30%) */
+        .row-timer-control { height: 30%; border-top: 3px solid black; }
+        
+        /* 内层控制表格 (分两行按钮) */
+        table.control-layout {
+            width: 100%; height: 100%;
+            border-collapse: collapse; table-layout: fixed;
+        }
+        .row-control-preset { height: 50%; } /* 预设时间行 */
+        .row-control-action { height: 50%; } /* 操作按钮行 */
+
+        /* --- 4. 按钮与组件样式 --- */
+        /* 通用按钮单元格样式 */
         .btn-cell {
-            border-bottom: 1px solid black; border-right: 1px solid black;
-            font-size: 26px; font-weight: bold; cursor: pointer; background: white;
+            border-right: 1px solid black;
+            border-bottom: 1px solid black;
+            font-weight: bold; cursor: pointer; background: white;
         }
         .btn-cell:active { background: black; color: white; }
+        /* 去除多余边框的辅助类 */
         .no-right { border-right: none; }
         .no-bottom { border-bottom: none; }
+        
+        /* 首页按钮字体 */
+        .home-btn-font { font-size: 26px; }
+        /* 闹钟页预设按钮字体 */
+        .preset-btn-font { font-size: 20px; }
+        /* 闹钟页操作按钮字体 */
+        .action-btn-font { font-size: 26px; }
 
+        /* 首页大字体 */
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
 
-        /* --- 3. 子页面通用 --- */
-        .sub-page { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: white; z-index: 10; }
-        .nav-bar {
-            height: 50px; line-height: 50px; background: black; color: white;
-            font-size: 20px; padding-left: 15px; font-weight: bold; cursor: pointer;
-            position: absolute; top: 0; width: 100%; z-index: 20;
-        }
-
-        /* --- 4. 专注闹钟页专用布局 (上下分层) --- */
-        
-        /* 上半部分：显示区 (占据剩余空间) */
-        .timer-display-area {
-            position: absolute;
-            top: 50px; /* 避开顶部导航栏 */
-            bottom: 30%; /* 留出30%给底部按钮 */
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 下半部分：控制区 (固定底部30%) */
-        .timer-control-area {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30%;
-            border-top: 3px solid black;
-        }
-
-        /* 控制区第一行：预设时间 */
-        .preset-row {
-            height: 50%;
-            width: 100%;
-            border-bottom: 1px solid black;
-        }
-        .preset-btn {
-            float: left;
-            width: 25%; /* 4个按钮平分 */
-            height: 100%;
-            border-right: 1px solid black;
+        /* --- 5. 子页面通用结构 --- */
+        .sub-page-container {
+            width: 100%; height: 100%;
+            position: relative; /* 为绝对定位的返回栏提供基准 */
             background: white;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            /* Flex布局让文字居中 */
-            display: flex; justify-content: center; align-items: center;
         }
-        .preset-btn:last-child { border-right: none; }
-        .preset-btn:active { background: black; color: white; }
-
-        /* 控制区第二行：操作按钮 */
-        .action-row {
-            height: 50%;
-            width: 100%;
+        /* 顶部返回栏 (绝对定位在最上方) */
+        .nav-bar-fixed {
+            position: absolute; top: 0; left: 0; width: 100%;
+            height: 40px; line-height: 40px; /* 高度稍微调小一点 */
+            background: black; color: white;
+            font-size: 18px; padding-left: 10px;
+            font-weight: bold; cursor: pointer; z-index: 100;
         }
-        .action-btn {
-            float: left;
-            width: 50%; /* 2个按钮平分 */
-            height: 100%;
-            border-right: 1px solid black;
-            background: white;
-            font-size: 26px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
+        /* 普通内容页的容器 */
+        .content-box-padded {
+            padding-top: 60px; /* 留出顶部返回栏的空间 */
+            text-align: center;
         }
-        .action-btn:last-child { border-right: none; }
-        .action-btn:active { background: #333; color: white; }
 
-
-        /* 点阵样式 (宽屏) */
+        /* === 闹钟页专用样式 === */
+        /* 点阵容器 (4px点 * 10个 + 间距 ≈ 120px) */
         #timer-grid {
-            width: 360px; 
-            margin: 0 auto 20px auto;
-            text-align: left;
-            line-height: 0;
+            width: 120px;
+            margin: 0 auto 20px auto; /* 居中 */
+            text-align: left; line-height: 0;
         }
+        /* 4px 小点点 */
         .dot {
             display: inline-block;
             width: 4px; height: 4px;
-            margin: 4px 16px; 
-            border-radius: 50%; 
-            background-color: black; 
+            margin: 4px; /* 间距 */
+            border-radius: 50%; background-color: black;
         }
-        .dot.passed { background-color: #ddd; }
-
+        .dot.passed { background-color: #ddd; } /* 变灰 */
         /* 倒计时数字 */
         #timer-val { font-size: 90px; font-weight: bold; margin: 0; line-height: 1; }
-        
-        /* 其他页面样式 */
-        .content-box { padding: 10px; text-align: center; margin-top: 60px; }
+
+        /* === 其他页面样式 === */
         #lucky-result { font-size: 50px; margin: 40px auto; padding: 20px; border: 3px dashed black; width: 80%; }
         #word-text { font-size: 60px; font-weight: bold; margin-top: 30px; }
         #pinyin-char { font-size: 120px; font-weight: bold; margin-top: 30px; }
+        /* 普通按钮 */
         .ctrl-btn { font-size: 22px; padding: 10px 25px; border: 3px solid black; background: white; margin: 5px; cursor: pointer;}
     </style>
 </head>
@@ -134,66 +120,73 @@
 
     <div id="home-page" style="width:100%; height:100%;">
         <table class="main-layout">
-            <tr class="row-time">
+            <tr class="row-home-time">
                 <td colspan="2">
                     <div id="clock-display">00:00</div>
                     <div id="date-display">正在校准...</div>
                 </td>
             </tr>
-            <tr class="row-btn">
-                <td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td>
-                <td class="btn-cell no-right" onclick="showPage('page-lucky')">随机干啥</td>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
+                <td class="btn-cell home-btn-font no-right" onclick="showPage('page-lucky')">随机干啥</td>
             </tr>
-            <tr class="row-btn">
-                <td class="btn-cell no-bottom" onclick="showPage('page-word')">每日单词</td>
-                <td class="btn-cell no-right no-bottom" onclick="showPage('page-pinyin')">韵母练习</td>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font no-bottom" onclick="showPage('page-word')">每日单词</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="showPage('page-pinyin')">韵母练习</td>
             </tr>
         </table>
     </div>
 
-    <div id="page-timer" class="hidden sub-page">
-        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
+    <div id="page-timer" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
         
-        <div class="timer-display-area">
-            <div id="timer-grid"></div>
-            <div id="timer-val">25:00</div>
-        </div>
-
-        <div class="timer-control-area">
-            <div class="preset-row">
-                <div class="preset-btn" onclick="setTimer(2)">2分</div>
-                <div class="preset-btn" onclick="setTimer(15)">15分</div>
-                <div class="preset-btn" onclick="setTimer(30)">30分</div>
-                <div class="preset-btn" onclick="setTimer(60)">60分</div>
-            </div>
-            <div class="action-row">
-                <div class="action-btn" id="btn-toggle" onclick="toggleTimer()">开始</div>
-                <div class="action-btn" onclick="resetTimer()">重置</div>
-            </div>
-        </div>
+        <table class="timer-layout">
+            <tr class="row-timer-display">
+                <td>
+                    <div style="padding-top: 40px;">
+                        <div id="timer-grid"></div> <div id="timer-val">25:00</div> </div>
+                </td>
+            </tr>
+            <tr class="row-timer-control">
+                <td>
+                    <table class="control-layout">
+                        <tr class="row-control-preset">
+                            <td class="btn-cell preset-btn-font" onclick="setTimer(2)">2分</td>
+                            <td class="btn-cell preset-btn-font" onclick="setTimer(15)">15分</td>
+                            <td class="btn-cell preset-btn-font" onclick="setTimer(30)">30分</td>
+                            <td class="btn-cell preset-btn-font no-right" onclick="setTimer(60)">60分</td>
+                        </tr>
+                        <tr class="row-control-action">
+                            <td class="btn-cell action-btn-font no-bottom" id="btn-toggle" onclick="toggleTimer()">开始</td>
+                            <td class="btn-cell action-btn-font no-right no-bottom" onclick="resetTimer()">重置</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <div id="page-lucky" class="hidden sub-page">
-        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
-        <div class="content-box">
+    <div id="page-lucky" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <div class="content-box-padded">
             <div style="font-size: 24px; margin-top:20px;">今天干点啥？</div>
             <div id="lucky-result">?</div>
             <button class="ctrl-btn" style="width: 80%" onclick="drawLucky()">开始抽签</button>
         </div>
     </div>
 
-    <div id="page-word" class="hidden sub-page">
-        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
-        <div class="content-box">
+    <div id="page-word" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <div class="content-box-padded">
             <div id="word-text">...</div>
             <div id="word-phonetic" style="font-size: 28px; color: #555; margin: 20px;">...</div>
             <div id="word-sentence" style="font-size: 22px; font-style: italic;">...</div>
         </div>
     </div>
 
-    <div id="page-pinyin" class="hidden sub-page">
-        <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
-        <div class="content-box">
+    <div id="page-pinyin" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <div class="content-box-padded">
             <div id="pinyin-char">a</div>
             <div id="pinyin-hint" style="font-size: 30px; margin-top: 20px;">张大嘴巴 a a a</div>
             <div style="margin-top: 40px;">
@@ -204,7 +197,9 @@
     </div>
 
     <script>
-        // --- 1. 时钟逻辑 ---
+        // ================= 核心逻辑 (保持不变) =================
+
+        // --- 1. 时钟 (UTC+8) ---
         function updateClock() {
             var now = new Date();
             var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -226,31 +221,29 @@
         function goHome() {
             var pages = ['page-timer', 'page-lucky', 'page-word', 'page-pinyin'];
             for(var i=0; i<pages.length; i++) {
-                document.getElementById(pages[i]).className = 'hidden sub-page';
+                document.getElementById(pages[i]).className = 'hidden sub-page-container';
             }
             document.getElementById('home-page').className = '';
         }
         function showPage(id) {
             document.getElementById('home-page').className = 'hidden';
-            document.getElementById(id).className = 'sub-page';
+            document.getElementById(id).className = 'sub-page-container';
             if(id === 'page-word') loadDailyWord();
             if(id === 'page-timer') {
                 if(document.getElementById('timer-grid').innerHTML === "") {
                     initTimerGrid();
-                    // 默认显示25分钟状态，但不开始
                     updateTimerDisplay();
                 }
             }
         }
 
-        // --- 3. 专注闹钟 (高级逻辑) ---
+        // --- 3. 专注闹钟逻辑 ---
         var timerInterval = null;
-        var defaultTime = 25 * 60; // 默认25分钟
+        var defaultTime = 25 * 60;
         var timeLeft = defaultTime; 
-        var totalTime = defaultTime; // 记录总时间，用于计算点阵比例
+        var totalTime = defaultTime;
         var isRunning = false;
         
-        // 初始化点阵
         function initTimerGrid() {
             var grid = document.getElementById('timer-grid');
             grid.innerHTML = "";
@@ -261,24 +254,20 @@
             }
         }
 
-        // 设定时间 (2, 15, 30, 60)
         function setTimer(minutes) {
-            pauseTimer(); // 只要点了预设，先暂停
+            pauseTimer();
             timeLeft = minutes * 60;
-            totalTime = timeLeft; // 更新总时间基准
-            updateTimerDisplay(); // 立即刷新显示
-            document.getElementById('btn-toggle').innerHTML = "开始"; // 按钮文字重置
+            totalTime = timeLeft;
+            updateTimerDisplay();
+            document.getElementById('btn-toggle').innerHTML = "开始";
         }
 
-        // 开始/暂停 切换逻辑
         function toggleTimer() {
             var btn = document.getElementById('btn-toggle');
             if (isRunning) {
-                // 正在运行 -> 暂停
                 pauseTimer();
                 btn.innerHTML = "继续";
             } else {
-                // 没运行 -> 开始
                 startTimer();
                 btn.innerHTML = "暂停";
             }
@@ -306,39 +295,27 @@
 
         function resetTimer() { 
             pauseTimer(); 
-            // 重置回当前的 totalTime (比如刚才选了60分，重置就是回60分，而不是回默认25)
             timeLeft = totalTime; 
             updateTimerDisplay(); 
             document.getElementById('btn-toggle').innerHTML = "开始";
         }
 
-        // 更新显示 (数字 + 点阵)
         function updateTimerDisplay() {
-            // 更新数字
             var m = Math.floor(timeLeft / 60);
             var s = timeLeft % 60;
             if (m < 10) m = '0' + m;
             if (s < 10) s = '0' + s;
             document.getElementById('timer-val').innerHTML = m + ':' + s;
 
-            // 更新点阵
             var dots = document.getElementsByClassName('dot');
             var totalDots = 60;
-            
-            // 计算过去的时间量
-            var timePassed = totalTime - timeLeft;
-            
-            // 比例计算： (过去时间 / 总时间) * 60个点
-            // 防止 totalTime 为 0 的情况
             if (totalTime <= 0) totalTime = 1;
+            var timePassed = totalTime - timeLeft;
             var grayCount = Math.floor((timePassed / totalTime) * totalDots);
             
             for(var i=0; i<totalDots; i++) {
-                if (i < grayCount) {
-                    dots[i].className = 'dot passed'; // 变灰
-                } else {
-                    dots[i].className = 'dot'; // 保持黑
-                }
+                if (i < grayCount) dots[i].className = 'dot passed';
+                else dots[i].className = 'dot';
             }
         }
 
