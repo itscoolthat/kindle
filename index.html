@@ -46,11 +46,10 @@
         }
         .content-box { padding: 10px; text-align: center; }
 
-        /* === 关键修改：超迷你点阵 (4px) === */
+        /* === 关键修改：宽屏点阵 === */
         #timer-grid {
-            /* 4px点 + 4px左边距 + 4px右边距 = 12px/个 */
-            /* 12px * 10个 = 120px 总宽 */
-            width: 120px; 
+            /* 之前是120px，现在扩大3倍到 360px */
+            width: 360px; 
             margin: 30px auto 10px auto; /* 居中 */
             text-align: left;
             line-height: 0;
@@ -58,16 +57,21 @@
         
         .dot {
             display: inline-block;
-            width: 4px;  /* 直径 4px */
+            width: 4px;  /* 直径保持 4px */
             height: 4px;
-            margin: 4px; /* 间距 */
+            
+            /* 关键：垂直间距不变(4px)，水平间距极大(16px) */
+            /* 16px左 + 4px宽 + 16px右 = 36px/个 */
+            /* 36px * 10个 = 360px 总宽 */
+            margin: 4px 16px; 
+            
             border-radius: 50%; 
-            background-color: black; 
-            /* 4px太小了，不要边框了，直接用实心点，清晰度更高 */
+            background-color: black; /* 默认为黑（未消耗） */
         }
         
+        /* 变灰的样式（代表时间已逝） */
         .dot.passed {
-            background-color: #ddd; /* 变成浅灰色 */
+            background-color: #ddd; /* 浅灰色 */
         }
 
         /* 倒计时数字 */
@@ -181,7 +185,7 @@
             }
         }
 
-        // --- 3. 闹钟逻辑 ---
+        // --- 3. 闹钟逻辑 (反向变灰) ---
         var timerInterval = null, timeLeft = 1500, isRunning = false;
         
         function initTimerGrid() {
@@ -198,10 +202,20 @@
             var dots = document.getElementsByClassName('dot');
             var totalDots = 60;
             var maxTime = 1500;
-            var activeCount = Math.ceil((timeLeft / maxTime) * totalDots);
+            
+            // 计算已经过去了多少时间
+            var timePassed = maxTime - timeLeft;
+            
+            // 计算应该变灰的点数 (向下取整，0秒过去就是0个灰点)
+            var grayCount = Math.floor((timePassed / maxTime) * totalDots);
+            
             for(var i=0; i<totalDots; i++) {
-                if (i < activeCount) dots[i].className = 'dot';
-                else dots[i].className = 'dot passed';
+                // 如果当前点的序号小于灰点数，说明它已经“过去”了
+                if (i < grayCount) {
+                    dots[i].className = 'dot passed'; // 变灰
+                } else {
+                    dots[i].className = 'dot'; // 保持黑
+                }
             }
         }
 
@@ -223,7 +237,13 @@
             }, 1000);
         }
         function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
-        function resetTimer() { pauseTimer(); timeLeft = 1500; updateTimerDisplay(); }
+        
+        // 重置时：时间归位，点阵全黑
+        function resetTimer() { 
+            pauseTimer(); 
+            timeLeft = 1500; 
+            updateTimerDisplay(); 
+        }
 
         // --- 4. 其他功能逻辑 (抽签/单词/拼音) ---
         var luckyOptions = ["读绘本", "做深蹲", "背单词", "发呆", "画画"];
