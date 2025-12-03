@@ -84,12 +84,12 @@
             <tr class="row-home-btn">
                 <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
                 
-                <td class="btn-cell home-btn-font no-right" onclick="window.location.href='http://kindleplay.com'">数独游戏</td>
+                <td class="btn-cell home-btn-font no-right" onclick="window.location.href='https://simple.m.wikipedia.org'">维基百科 ➚</td>
             </tr>
             <tr class="row-home-btn">
-                <td class="btn-cell home-btn-font no-bottom" onclick="window.location.href='https://ankiuser.net/study'">3L</td>
+                <td class="btn-cell home-btn-font no-bottom" onclick="window.location.href='https://www.calculator.net/simple-calculator.html'">计算器 ➚</td>
                 
-                <td class="btn-cell home-btn-font no-right no-bottom" onclick="window.location.href='https://ankiuser.net/study'">Anki</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="window.location.href='https://ankiuser.net/study'">Anki 记忆卡 ➚</td>
             </tr>
         </table>
     </div>
@@ -145,7 +145,6 @@
 
         // --- 2. 页面切换 ---
         function goHome() {
-            // 只有闹钟页面需要隐藏了，其他都是外链
             document.getElementById('page-timer').className = 'hidden sub-page-container';
             document.getElementById('home-page').className = '';
         }
@@ -160,7 +159,7 @@
             }
         }
 
-        // --- 3. 专注闹钟 (20x3 宽屏版) ---
+        // --- 3. 专注闹钟逻辑 ---
         var timerInterval = null;
         var defaultTime = 25 * 60;
         var timeLeft = defaultTime; 
@@ -193,54 +192,4 @@
             if (isRunning) {
                 pauseTimer();
                 btn.innerHTML = "继续";
-            } else {
-                startTimer();
-                btn.innerHTML = "暂停";
-            }
-        }
-
-        function startTimer() {
-            if (isRunning) return;
-            isRunning = true;
-            timerInterval = setInterval(function() {
-                if (timeLeft > 0) { 
-                    timeLeft--; 
-                    updateTimerDisplay(); 
-                } else { 
-                    pauseTimer(); 
-                    document.getElementById('btn-toggle').innerHTML = "开始";
-                    alert("时间到！"); 
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
-        function resetTimer() { 
-            pauseTimer(); 
-            timeLeft = totalTime; 
-            updateTimerDisplay(); 
-            document.getElementById('btn-toggle').innerHTML = "开始";
-        }
-
-        function updateTimerDisplay() {
-            var m = Math.floor(timeLeft / 60);
-            var s = timeLeft % 60;
-            if (m < 10) m = '0' + m;
-            if (s < 10) s = '0' + s;
-            document.getElementById('timer-val').innerHTML = m + ':' + s;
-            
-            var dots = document.getElementsByClassName('dot');
-            var totalDots = 60;
-            if (totalTime <= 0) totalTime = 1;
-            var timePassed = totalTime - timeLeft;
-            var grayCount = Math.floor((timePassed / totalTime) * totalDots);
-            
-            for(var i=0; i<totalDots; i++) {
-                if (i < grayCount) dots[i].className = 'dot passed';
-                else dots[i].className = 'dot';
-            }
-        }
-
-    </script>
-</body>
-</html>
+            } else
