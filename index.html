@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kindle学习台</title>
+    <style>
+        body { font-family: "Helvetica", "Arial", sans-serif; background-color: white; color: black; margin: 0; padding: 10px; text-align: center; overflow-x: hidden; }
+        .hidden { display: none !important; }
+        .btn { border: 3px solid black; background: white; color: black; padding: 15px; margin: 10px; font-size: 24px; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 3px 3px 0px black; display: inline-block; }
+        .btn:active { background: black; color: white; box-shadow: none; transform: translate(3px, 3px); }
+        .back-btn { position: absolute; top: 10px; left: 10px; font-size: 18px; padding: 5px 15px; border: 2px solid black; z-index: 100; }
+        #clock-display { font-size: 80px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; letter-spacing: 5px; }
+        #date-display { font-size: 20px; margin-bottom: 30px; border-bottom: 2px solid black; padding-bottom: 10px; display: inline-block; }
+        .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .menu-item { width: 40%; height: 120px; border: 3px solid black; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; box-shadow: 4px 4px 0px black; }
+        .menu-icon { font-size: 40px; margin-bottom: 10px; }
+        #timer-val { font-size: 100px; font-weight: bold; margin: 40px 0; }
+        #lucky-result { font-size: 50px; margin: 50px 0; font-weight: bold; min-height: 120px; padding: 20px; border: 2px dashed black;}
+        #word-text { font-size: 60px; font-weight: bold; margin-top: 40px; }
+        #word-phonetic { font-size: 24px; color: #333; margin-bottom: 20px; }
+        #word-sentence { font-size: 24px; font-style: italic; padding: 20px; line-height: 1.4; }
+        #pinyin-char { font-size: 100px; font-weight: bold; margin-top: 20px; }
+        #pinyin-img { font-size: 80px; margin: 20px 0; }
+        #pinyin-hint { font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div id="home-page">
+        <div id="clock-display">00:00</div>
+        <div id="date-display">...</div>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showPage('page-timer')"><div class="menu-icon">🍅</div><div>专注闹钟</div></div>
+            <div class="menu-item" onclick="showPage('page-lucky')"><div class="menu-icon">🎲</div><div>随机干啥</div></div>
+            <div class="menu-item" onclick="showPage('page-word')"><div class="menu-icon">📖</div><div>每日单词</div></div>
+            <div class="menu-item" onclick="showPage('page-pinyin')"><div class="menu-icon">🗣️</div><div>韵母练习</div></div>
+        </div>
+    </div>
+
+    <div id="page-timer" class="hidden">
+        <button class="btn back-btn" onclick="showPage('home-page')">⬅ 主页</button>
+        <h2 style="margin-top: 60px;">专注时间</h2>
+        <div id="timer-val">25:00</div>
+        <div><button class="btn" onclick="startTimer()">开始</button><button class="btn" onclick="pauseTimer()">暂停</button><button class="btn" onclick="resetTimer()">重置</button></div>
+    </div>
+
+    <div id="page-lucky" class="hidden">
+        <button class="btn back-btn" onclick="showPage('home-page')">⬅ 主页</button>
+        <h2 style="margin-top: 60px;">现在做什么？</h2>
+        <div id="lucky-result">?</div>
+        <button class="btn" style="width: 80%" onclick="drawLucky()">开始抽签</button>
+    </div>
+
+    <div id="page-word" class="hidden">
+        <button class="btn back-btn" onclick="showPage('home-page')">⬅ 主页</button>
+        <div id="word-content">
+            <div id="word-text">Apple</div><div id="word-phonetic">/ˈæp.l/</div><div id="word-sentence">An apple a day keeps the doctor away.</div>
+        </div>
+    </div>
+
+    <div id="page-pinyin" class="hidden">
+        <button class="btn back-btn" onclick="showPage('home-page')">⬅ 主页</button>
+        <div id="pinyin-display"><div id="pinyin-char">a</div><div id="pinyin-img">😮</div><div id="pinyin-hint">张大嘴巴 aaa</div></div>
+        <div style="margin-top: 30px;"><button class="btn" onclick="prevPinyin()">上一个</button><button class="btn" onclick="nextPinyin()">下一个</button></div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-display').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('date-display').innerText = now.toLocaleDateString('zh-CN', {month:'long', day:'numeric', weekday:'long'});
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        function showPage(pageId) {
+            ['home-page', 'page-timer', 'page-lucky', 'page-word', 'page-pinyin'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+            if(pageId === 'page-word') loadDailyWord();
+        }
+
+        let timerInterval, timeLeft = 1500, isRunning = false;
+        function updateTimerDisplay() { document.getElementById('timer-val').innerText = `${String(Math.floor(timeLeft/60)).padStart(2,'0')}:${String(timeLeft%60).padStart(2,'0')}`; }
+        function startTimer() { if(isRunning) return; isRunning = true; timerInterval = setInterval(() => { if(timeLeft > 0) { timeLeft--; updateTimerDisplay(); } else { pauseTimer(); alert("时间到！"); } }, 1000); }
+        function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
+        function resetTimer() { pauseTimer(); timeLeft = 1500; updateTimerDisplay(); }
+
+        const luckyOptions = ["📚 读绘本", "🏋️ 做深蹲", "🧠 背单词", "😶 发呆"];
+        function drawLucky() {
+            const box = document.getElementById('lucky-result'); box.innerText = "...";
+            let c = 0, f = setInterval(() => { box.innerText = luckyOptions[Math.floor(Math.random()*luckyOptions.length)]; c++; if(c>5) clearInterval(f); }, 200);
+        }
+
+        const wordDb = [{t:"Cat",p:"/kæt/",s:"The cat is sleeping."}, {t:"Apple",p:"/ˈæp.l/",s:"I like apples."}, {t:"Book",p:"/bʊk/",s:"Read a book."}, {t:"Happy",p:"/ˈhæp.i/",s:"Be happy!"}, {t:"Sun",p:"/sʌn/",s:"Hot sun."}, {t:"Water",p:"/ˈwɔː.tər/",s:"Drink water."}, {t:"Play",p:"/pleɪ/",s:"Let's play!"}];
+        function loadDailyWord() { const w = wordDb[new Date().getDay()]; document.getElementById('word-text').innerText = w.t; document.getElementById('word-phonetic').innerText = w.p; document.getElementById('word-sentence').innerText = w.s; }
+
+        const pinyinData = [{char:"ɑ",img:"😮",hint:"张大嘴巴 ɑ ɑ ɑ"}, {char:"o",img:"🐓",hint:"公鸡打鸣 o o o"}, {char:"e",img:"🦢",hint:"大白鹅 e e e"}, {char:"i",img:"👕",hint:"一件衣服 i i i"}, {char:"u",img:"🐢",hint:"一只乌龟 u u u"}, {char:"ü",img:"🐟",hint:"小鱼吐泡 ü ü ü"}];
+        let pIndex = 0;
+        function updatePinyin() { const d = pinyinData[pIndex]; document.getElementById('pinyin-char').innerText = d.char; document.getElementById('pinyin-img').innerText = d.img; document.getElementById('pinyin-hint').innerText = d.hint; }
+        function nextPinyin() { pIndex = (pIndex+1)%pinyinData.length; updatePinyin(); }
+        function prevPinyin() { pIndex = (pIndex-1+pinyinData.length)%pinyinData.length; updatePinyin(); }
+        updatePinyin();
+    </script>
+</body>
+</html>
