@@ -78,18 +78,16 @@
             <tr class="row-home-time">
                 <td colspan="2">
                     <div id="clock-display">00:00</div>
-                    <div id="date-display">正在校准...</div>
+                    <div id="date-display">正在启动...</div>
                 </td>
             </tr>
             <tr class="row-home-btn">
                 <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
-                
-                <td class="btn-cell home-btn-font no-right" onclick="window.location.href='https://simple.m.wikipedia.org'">维基百科</td>
+                <td class="btn-cell home-btn-font no-right" onclick="openLink('https://simple.m.wikipedia.org')">维基百科</td>
             </tr>
             <tr class="row-home-btn">
-                <td class="btn-cell home-btn-font no-bottom" onclick="window.location.href='https://www.calculator.net/simple-calculator.html'">计算器</td>
-                
-                <td class="btn-cell home-btn-font no-right no-bottom" onclick="window.location.href='https://ankiuser.net/study'">我的闪卡</td>
+                <td class="btn-cell home-btn-font no-bottom" onclick="openLink('https://www.calculator.net/simple-calculator.html')">计算器</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="openLink('https://ankiuser.net/study')">我的闪卡</td>
             </tr>
         </table>
     </div>
@@ -125,71 +123,155 @@
     </div>
 
     <script>
-        // --- 1. 时钟 (UTC+8) ---
-        function updateClock() {
-            var now = new Date();
-            var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            var beijingTime = new Date(utc + (3600000 * 8));
-            var h = beijingTime.getHours();
-            var m = beijingTime.getMinutes();
-            if (h < 10) h = '0' + h;
-            if (m < 10) m = '0' + m;
-            document.getElementById('clock-display').innerHTML = h + ':' + m;
-            var mo = beijingTime.getMonth() + 1;
-            var d = beijingTime.getDate();
-            var days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-            document.getElementById('date-display').innerHTML = mo + '月' + d + '日 · ' + days[beijingTime.getDay()];
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // --- 2. 页面切换 ---
-        function goHome() {
-            document.getElementById('page-timer').className = 'hidden sub-page-container';
-            document.getElementById('home-page').className = '';
-        }
-        function showPage(id) {
-            document.getElementById('home-page').className = 'hidden';
-            document.getElementById(id).className = 'sub-page-container';
-            if(id === 'page-timer') {
-                if(document.getElementById('timer-grid').innerHTML === "") {
-                    initTimerGrid();
-                    updateTimerDisplay();
+        // 为了防止老浏览器报错，我们将所有逻辑放入 onload
+        window.onload = function() {
+            
+            // --- 1. 时钟核心 (UTC+8 强力修复版) ---
+            function updateClock() {
+                try {
+                    var now = new Date();
+                    // 获取当前UTC时间戳
+                    var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    // 强制加8小时
+                    var beijingTime = new Date(utc + (3600000 * 8));
+                    
+                    var h = beijingTime.getHours();
+                    var m = beijingTime.getMinutes();
+                    if (h < 10) h = '0' + h;
+                    if (m < 10) m = '0' + m;
+                    
+                    // 更新时间
+                    var clockEl = document.getElementById('clock-display');
+                    if(clockEl) clockEl.innerHTML = h + ':' + m;
+                    
+                    // 更新日期
+                    var mo = beijingTime.getMonth() + 1;
+                    var d = beijingTime.getDate();
+                    var days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+                    var dateEl = document.getElementById('date-display');
+                    if(dateEl) dateEl.innerHTML = mo + '月' + d + '日 · ' + days[beijingTime.getDay()];
+                } catch(e) {
+                    // 如果出错，显示错误信息
+                    document.getElementById('date-display').innerHTML = "时钟错误";
                 }
             }
-        }
+            
+            // 立即运行一次，然后每秒运行
+            updateClock();
+            setInterval(updateClock, 1000);
 
-        // --- 3. 专注闹钟逻辑 ---
-        var timerInterval = null;
-        var defaultTime = 25 * 60;
-        var timeLeft = defaultTime; 
-        var totalTime = defaultTime;
-        var isRunning = false;
-        
-        function initTimerGrid() {
-            var grid = document.getElementById('timer-grid');
-            grid.innerHTML = "";
-            for(var i=0; i<60; i++) {
-                var wrapper = document.createElement('div');
-                wrapper.className = 'dot-wrapper';
-                var dot = document.createElement('div');
-                dot.className = 'dot';
-                wrapper.appendChild(dot);
-                grid.appendChild(wrapper);
-            }
-        }
 
-        function setTimer(minutes) {
-            pauseTimer();
-            timeLeft = minutes * 60;
-            totalTime = timeLeft;
-            updateTimerDisplay();
-            document.getElementById('btn-toggle').innerHTML = "开始";
-        }
+            // --- 2. 全局变量定义 ---
+            var timerInterval = null;
+            var defaultTime = 25 * 60;
+            var timeLeft = defaultTime; 
+            var totalTime = defaultTime;
+            var isRunning = false;
 
-        function toggleTimer() {
-            var btn = document.getElementById('btn-toggle');
-            if (isRunning) {
-                pauseTimer();
-                btn.innerHTML = "继续";
-            } else
+            // --- 3. 全局函数挂载 (让HTML里的onclick能找到这些函数) ---
+            
+            // 外链跳转函数
+            window.openLink = function(url) {
+                window.location.href = url;
+            };
+
+            // 页面切换
+            window.goHome = function() {
+                document.getElementById('page-timer').className = 'hidden sub-page-container';
+                document.getElementById('home-page').className = '';
+            };
+            
+            window.showPage = function(id) {
+                document.getElementById('home-page').className = 'hidden';
+                document.getElementById(id).className = 'sub-page-container';
+                if(id === 'page-timer') {
+                    if(document.getElementById('timer-grid').innerHTML === "") {
+                        initTimerGrid();
+                        updateTimerDisplay();
+                    }
+                }
+            };
+
+            // 专注闹钟逻辑
+            window.initTimerGrid = function() {
+                var grid = document.getElementById('timer-grid');
+                grid.innerHTML = "";
+                for(var i=0; i<60; i++) {
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'dot-wrapper';
+                    var dot = document.createElement('div');
+                    dot.className = 'dot';
+                    wrapper.appendChild(dot);
+                    grid.appendChild(wrapper);
+                }
+            };
+
+            window.setTimer = function(minutes) {
+                window.pauseTimer();
+                timeLeft = minutes * 60;
+                totalTime = timeLeft;
+                updateTimerDisplay();
+                document.getElementById('btn-toggle').innerHTML = "开始";
+            };
+
+            window.toggleTimer = function() {
+                var btn = document.getElementById('btn-toggle');
+                if (isRunning) {
+                    window.pauseTimer();
+                    btn.innerHTML = "继续";
+                } else {
+                    window.startTimer();
+                    btn.innerHTML = "暂停";
+                }
+            };
+
+            window.startTimer = function() {
+                if (isRunning) return;
+                isRunning = true;
+                timerInterval = setInterval(function() {
+                    if (timeLeft > 0) { 
+                        timeLeft--; 
+                        updateTimerDisplay(); 
+                    } else { 
+                        window.pauseTimer(); 
+                        document.getElementById('btn-toggle').innerHTML = "开始";
+                        alert("时间到！"); 
+                    }
+                }, 1000);
+            };
+
+            window.pauseTimer = function() { 
+                clearInterval(timerInterval); 
+                isRunning = false; 
+            };
+
+            window.resetTimer = function() { 
+                window.pauseTimer(); 
+                timeLeft = totalTime; 
+                updateTimerDisplay(); 
+                document.getElementById('btn-toggle').innerHTML = "开始";
+            };
+
+            window.updateTimerDisplay = function() {
+                var m = Math.floor(timeLeft / 60);
+                var s = timeLeft % 60;
+                if (m < 10) m = '0' + m;
+                if (s < 10) s = '0' + s;
+                document.getElementById('timer-val').innerHTML = m + ':' + s;
+                
+                var dots = document.getElementsByClassName('dot');
+                var totalDots = 60;
+                if (totalTime <= 0) totalTime = 1;
+                var timePassed = totalTime - timeLeft;
+                var grayCount = Math.floor((timePassed / totalTime) * totalDots);
+                
+                for(var i=0; i<totalDots; i++) {
+                    if (i < grayCount) dots[i].className = 'dot passed';
+                    else dots[i].className = 'dot';
+                }
+            };
+            
+        }; // window.onload 结束
+    </script>
+</body>
+</html>
