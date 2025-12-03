@@ -5,119 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
     <style>
-        /* --- 全局重置 --- */
+        /* --- 1. 全局重置 --- */
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* 禁止滚动条 */
-            background-color: white;
-            color: black;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: white; color: black;
             font-family: Arial, sans-serif;
         }
-
-        /* 隐藏功能 */
         .hidden { display: none !important; }
 
-        /* --- 首页：表格布局 (最稳妥) --- */
+        /* --- 2. 布局核心：表格布局 --- */
         table.main-layout {
-            width: 100%;
-            height: 100%;
-            border-collapse: collapse; /* 去除格间距 */
-            table-layout: fixed; /* 固定列宽 */
+            width: 100%; height: 100%;
+            border-collapse: collapse; table-layout: fixed;
         }
+        .row-time { height: 60%; border-bottom: 3px solid black; }
+        .row-btn { height: 20%; }
+        td { text-align: center; vertical-align: middle; padding: 0; }
 
-        /* 时间区域：占总高度的 60% */
-        .row-time {
-            height: 60%;
-            border-bottom: 3px solid black;
-        }
-        
-        /* 按钮区域：两行，每行占 20% (总共40%) */
-        .row-btn {
-            height: 20%;
-        }
-
-        /* 单元格通用样式 */
-        td {
-            text-align: center;
-            vertical-align: middle;
-            padding: 0;
-        }
-
-        /* 按钮样式 */
+        /* --- 3. 按钮与字体样式 --- */
         .btn-cell {
-            border-bottom: 1px solid black;
-            border-right: 1px solid black;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            background: white;
+            border-bottom: 1px solid black; border-right: 1px solid black;
+            font-size: 26px; font-weight: bold; cursor: pointer; background: white;
         }
-        
-        /* 按下效果 */
-        .btn-cell:active {
-            background: black;
-            color: white;
-        }
-
-        /* 去掉最右边和最底边的线，看起来更整齐 */
+        .btn-cell:active { background: black; color: white; }
         .no-right { border-right: none; }
         .no-bottom { border-bottom: none; }
 
-        /* 时间字体 */
-        #clock-display {
-            font-size: 90px; /* 稍微调小一点点以防撑爆 */
-            font-weight: bold;
-            line-height: 1;
-        }
-        #date-display {
-            font-size: 20px;
-            margin-top: 10px;
-        }
+        #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
+        #date-display { font-size: 20px; margin-top: 15px; }
 
-        /* --- 子页面样式 --- */
+        /* --- 4. 子页面样式 --- */
         .sub-page {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: white;
-            z-index: 10;
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            background: white; z-index: 10;
+        }
+        .nav-bar {
+            height: 50px; line-height: 50px; background: black; color: white;
+            font-size: 20px; padding-left: 15px; font-weight: bold; cursor: pointer;
         }
         
-        .nav-bar {
-            height: 50px;
-            line-height: 50px;
-            background: black;
-            color: white;
-            font-size: 20px;
-            padding-left: 15px;
-            font-weight: bold;
-            cursor: pointer;
+        /* 这里的 padding-top 改小一点，给点阵腾出空间 */
+        .content-box { padding: 10px; text-align: center; }
+
+        /* --- 新增：时间颗粒点阵样式 --- */
+        #timer-grid {
+            width: 320px; /* 限制宽度让它换行 */
+            margin: 20px auto 10px auto; /* 居中 */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .dot {
+            width: 22px; 
+            height: 22px;
+            margin: 4px; /* 颗粒之间的间距 */
+            border-radius: 50%; /* 圆形 */
+            background-color: black; /* 默认黑色(剩余) */
+            border: 1px solid black; /* 加上边框，变灰时轮廓更清晰 */
+        }
+        .dot.passed {
+            background-color: #ccc; /* 灰色(已过去) */
+            border-color: #999;
         }
 
-        .content-box {
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* 功能大字 */
-        #timer-val { font-size: 90px; font-weight: bold; margin: 30px 0; }
+        /* 倒计时数字 */
+        #timer-val { font-size: 80px; font-weight: bold; margin: 10px 0 30px 0; }
+        
+        /* 其他功能页样式 */
         #lucky-result { font-size: 50px; margin: 40px auto; padding: 20px; border: 3px dashed black; width: 80%; }
         #word-text { font-size: 60px; font-weight: bold; margin-top: 30px; }
         #pinyin-char { font-size: 120px; font-weight: bold; margin-top: 30px; }
-
-        .ctrl-btn {
-            font-size: 22px;
-            padding: 10px 25px;
-            border: 3px solid black;
-            background: white;
-            margin: 5px;
-            cursor: pointer;
-        }
+        .ctrl-btn { font-size: 22px; padding: 10px 25px; border: 3px solid black; background: white; margin: 5px; cursor: pointer;}
     </style>
 </head>
 <body>
@@ -127,15 +85,13 @@
             <tr class="row-time">
                 <td colspan="2">
                     <div id="clock-display">00:00</div>
-                    <div id="date-display">正在加载...</div>
+                    <div id="date-display">正在校准...</div>
                 </td>
             </tr>
-            
             <tr class="row-btn">
                 <td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td>
                 <td class="btn-cell no-right" onclick="showPage('page-lucky')">随机干啥</td>
             </tr>
-            
             <tr class="row-btn">
                 <td class="btn-cell no-bottom" onclick="showPage('page-word')">每日单词</td>
                 <td class="btn-cell no-right no-bottom" onclick="showPage('page-pinyin')">韵母练习</td>
@@ -146,17 +102,21 @@
     <div id="page-timer" class="hidden sub-page">
         <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
         <div class="content-box">
-            <div style="font-size: 24px;">专注倒计时</div>
+            <div id="timer-grid"></div>
+            
             <div id="timer-val">25:00</div>
-            <button class="ctrl-btn" onclick="startTimer()">开始</button>
-            <button class="ctrl-btn" onclick="resetTimer()">重置</button>
+            
+            <div>
+                <button class="ctrl-btn" onclick="startTimer()">开始</button>
+                <button class="ctrl-btn" onclick="resetTimer()">重置</button>
+            </div>
         </div>
     </div>
 
     <div id="page-lucky" class="hidden sub-page">
         <div class="nav-bar" onclick="goHome()"> < 返回主页 </div>
         <div class="content-box">
-            <div style="font-size: 24px;">今天干点啥？</div>
+            <div style="font-size: 24px; margin-top:20px;">今天干点啥？</div>
             <div id="lucky-result">?</div>
             <button class="ctrl-btn" style="width: 80%" onclick="drawLucky()">开始抽签</button>
         </div>
@@ -184,21 +144,26 @@
     </div>
 
     <script>
-        // --- 逻辑代码 (保持功能不变) ---
+        // ==========================================
+        // 核心逻辑区
+        // ==========================================
 
-        // 1. 时钟
+        // 1. 时钟功能 (强制修复北京时间 +8)
         function updateClock() {
             var now = new Date();
-            var h = now.getHours();
-            var m = now.getMinutes();
+            var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            var beijingTime = new Date(utc + (3600000 * 8)); // +8小时
+            
+            var h = beijingTime.getHours();
+            var m = beijingTime.getMinutes();
             if (h < 10) h = '0' + h;
             if (m < 10) m = '0' + m;
             document.getElementById('clock-display').innerHTML = h + ':' + m;
             
-            var mo = now.getMonth() + 1;
-            var d = now.getDate();
+            var mo = beijingTime.getMonth() + 1;
+            var d = beijingTime.getDate();
             var days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-            document.getElementById('date-display').innerHTML = mo + '月' + d + '日 · ' + days[now.getDay()];
+            document.getElementById('date-display').innerHTML = mo + '月' + d + '日 · ' + days[beijingTime.getDay()];
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -211,34 +176,86 @@
             }
             document.getElementById('home-page').className = '';
         }
-        
         function showPage(id) {
             document.getElementById('home-page').className = 'hidden';
-            document.getElementById(id).className = 'sub-page'; // 显示子页面
+            document.getElementById(id).className = 'sub-page';
             if(id === 'page-word') loadDailyWord();
+            if(id === 'page-timer') {
+                // 每次进入闹钟页，检查并初始化点阵
+                if(document.getElementById('timer-grid').innerHTML === "") {
+                    initTimerGrid();
+                }
+            }
         }
 
-        // 3. 倒计时
+        // --- 3. 专注闹钟 (带颗粒更新逻辑) ---
         var timerInterval = null, timeLeft = 1500, isRunning = false;
+        
+        // A. 初始化点阵：生成60个黑色点点
+        function initTimerGrid() {
+            var grid = document.getElementById('timer-grid');
+            grid.innerHTML = ""; // 清空
+            for(var i=0; i<60; i++) {
+                var dot = document.createElement('div');
+                dot.className = 'dot'; // 默认为黑色
+                grid.appendChild(dot);
+            }
+        }
+
+        // B. 更新点阵颜色
+        function updateTimerGrid() {
+            var dots = document.getElementsByClassName('dot');
+            var totalDots = 60;
+            var maxTime = 1500;
+            
+            // 计算还应该亮着几个点 (向上取整，保证剩最后1秒时还有1个点)
+            var activeCount = Math.ceil((timeLeft / maxTime) * totalDots);
+            
+            for(var i=0; i<totalDots; i++) {
+                if (i < activeCount) {
+                    // 前面的点：黑色 (剩余)
+                    dots[i].className = 'dot';
+                } else {
+                    // 后面的点：灰色 (已过)
+                    dots[i].className = 'dot passed';
+                }
+            }
+        }
+
         function updateTimerDisplay() {
             var m = Math.floor(timeLeft / 60);
             var s = timeLeft % 60;
             if (m < 10) m = '0' + m;
             if (s < 10) s = '0' + s;
             document.getElementById('timer-val').innerHTML = m + ':' + s;
+            
+            // 每次更新数字时，也更新点阵
+            updateTimerGrid();
         }
+
         function startTimer() {
             if (isRunning) return;
             isRunning = true;
             timerInterval = setInterval(function() {
-                if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); } 
-                else { pauseTimer(); alert("时间到！"); }
+                if (timeLeft > 0) { 
+                    timeLeft--; 
+                    updateTimerDisplay(); 
+                } else { 
+                    pauseTimer(); 
+                    alert("时间到！"); 
+                }
             }, 1000);
         }
         function pauseTimer() { clearInterval(timerInterval); isRunning = false; }
-        function resetTimer() { pauseTimer(); timeLeft = 1500; updateTimerDisplay(); }
+        
+        function resetTimer() { 
+            pauseTimer(); 
+            timeLeft = 1500; 
+            updateTimerDisplay(); 
+            // 重置时，点阵也会自动变回全黑
+        }
 
-        // 4. 抽签
+        // 4. 随机抽签
         var luckyOptions = ["读绘本", "做深蹲", "背单词", "发呆", "画画"];
         function drawLucky() {
             var box = document.getElementById('lucky-result');
@@ -252,7 +269,7 @@
             }, 200);
         }
 
-        // 5. 单词
+        // 5. 每日单词
         var wordDb = [
             {t:"Cat", p:"/kæt/", s:"The cat is sleeping."},    
             {t:"Apple", p:"/æpl/", s:"I like apples."},         
@@ -270,7 +287,7 @@
             document.getElementById('word-sentence').innerHTML = w.s;
         }
 
-        // 6. 韵母
+        // 6. 韵母练习
         var pinyinData = [{char:"a", hint:"张大嘴巴 a a a"}, {char:"o", hint:"公鸡打鸣 o o o"}, {char:"e", hint:"大白鹅 e e e"}, {char:"i", hint:"一件衣服 i i i"}, {char:"u", hint:"一只乌龟 u u u"}, {char:"ü", hint:"小鱼吐泡 ü ü ü"}];
         var pIndex = 0;
         function updatePinyin() {
