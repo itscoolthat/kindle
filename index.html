@@ -157,7 +157,7 @@
                 document.getElementById('idiom-date').innerHTML = (today.getMonth()+1) + "月" + today.getDate() + "日 · 每日成语";
             };
 
-                // --- 修复后的搜索逻辑 ---
+            // --- 修复后的搜索逻辑 ---
             window.searchPoem = function() {
                 var input = document.getElementById('search-input').value;
                 if (!input) { alert("请输入关键字"); return; }
@@ -184,17 +184,7 @@
                 if (results.length > 0) {
                     // 找到了！显示第一条
                     var p = results[0];
-                    document.getElementById('poem-content').innerHTML = p.content;
-                    document.getElementById('poem-info').innerHTML = "— " + p.author + " · " + p.origin;
-                    
-                    // 如果有图就显示图
-                    var imgEl = document.getElementById('poem-image');
-                    if (p.image && p.image !== "") {
-                        imgEl.src = p.image;
-                        imgEl.style.display = 'block';
-                    } else {
-                        imgEl.style.display = 'none';
-                    }
+                    renderPoemUI(p);
 
                     // 如果搜到多首，提示一下
                     if(results.length > 1) { 
@@ -214,10 +204,12 @@
                 xhr.onreadystatechange = function() { if (xhr.readyState === 4) { if (xhr.status === 200) { try { var data = JSON.parse(xhr.responseText); contentEl.innerHTML = data.content; infoEl.innerHTML = "— " + data.author + " · " + data.origin; imgEl.style.display = 'none'; } catch(e) { showLocalPoem(); } } else { showLocalPoem(); } } };
                 xhr.ontimeout = function () { showLocalPoem(); }; xhr.onerror = function () { showLocalPoem(); }; xhr.send();
             };
+            
             function showLocalPoem() {
                 var poemDB = window.myPoemDB; if (!poemDB || poemDB.length === 0) poemDB = [{ content: "白日依山尽，黄河入海流。", origin: "登鹳雀楼", author: "王之涣" }];
                 var r = Math.floor(Math.random() * poemDB.length); renderPoemUI(poemDB[r]);
             }
+            
             function renderPoemUI(poem) {
                 document.getElementById('poem-content').innerHTML = poem.content; document.getElementById('poem-info').innerHTML = "— " + poem.author + " · " + poem.origin;
                 var imgEl = document.getElementById('poem-image');
