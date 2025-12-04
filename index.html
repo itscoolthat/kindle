@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
+    
+    <script src="poems.js"></script>
+    
     <style>
         /* --- 1. 全局基础 --- */
         html, body {
@@ -50,24 +53,22 @@
             line-height: 40px; background: black; color: white;
             font-size: 18px; padding-left: 10px; font-weight: bold; cursor: pointer; z-index: 100;
         }
+        .content-box-padded { padding-top: 60px; text-align: center; padding-left: 20px; padding-right: 20px;}
+        
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
 
-        /* --- 6. 宽屏点阵 (20x3) --- */
-        #timer-grid {
-            width: 96%; margin: 0 auto 10px auto; 
-            font-size: 0; text-align: center;
-        }
-        .dot-wrapper {
-            display: inline-block; width: 5%; height: 20px; 
-            vertical-align: middle; text-align: center;
-        }
-        .dot {
-            display: inline-block; width: 6px; height: 6px;
-            border-radius: 50%; background-color: black; vertical-align: middle;
-        }
+        #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
+        .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
         .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
+
+        /* 古诗页面样式 */
+        #poem-content { font-size: 45px; font-weight: bold; line-height: 1.4; margin-top: 40px; margin-bottom: 30px; }
+        #poem-info { font-size: 24px; color: #444; font-style: normal; }
+        .refresh-btn { margin-top: 50px; padding: 15px 40px; font-size: 24px; border: 3px solid black; background: white; cursor: pointer; font-weight: bold; }
+        .refresh-btn:active { background: black; color: white; }
 
     </style>
 </head>
@@ -83,11 +84,11 @@
             </tr>
             <tr class="row-home-btn">
                 <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
-                <td class="btn-cell home-btn-font no-right" onclick="openLink('http://frogfind.com')">搜 索</td>
+                <td class="btn-cell home-btn-font no-right" onclick="openLink('https://simple.m.wikipedia.org')">搜索</td>
             </tr>
             <tr class="row-home-btn">
-                <td class="btn-cell home-btn-font no-bottom" onclick="openLink('http://68k.news/')">新 闻</td>
-                <td class="btn-cell home-btn-font no-right no-bottom" onclick="openLink('https://ankiuser.net/study')">我的闪卡</td>
+                <td class="btn-cell home-btn-font no-bottom" onclick="showPage('page-poetry')">古诗赏析</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="openLink('https://ankiuser.net/study')">记忆卡</td>
             </tr>
         </table>
     </div>
@@ -122,62 +123,46 @@
         </table>
     </div>
 
+    <div id="page-poetry" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <div class="content-box-padded">
+            <div id="poem-content">正在取诗...</div>
+            <div id="poem-info">...</div>
+            <button class="refresh-btn" onclick="fetchPoem()">换一首</button>
+        </div>
+    </div>
+
     <script>
-        // 为了防止老浏览器报错，我们将所有逻辑放入 onload
         window.onload = function() {
             
-            // --- 1. 时钟核心 (UTC+8 强力修复版) ---
+            // --- 1. 时钟 ---
             function updateClock() {
                 try {
                     var now = new Date();
-                    // 获取当前UTC时间戳
                     var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                    // 强制加8小时
                     var beijingTime = new Date(utc + (3600000 * 8));
-                    
                     var h = beijingTime.getHours();
                     var m = beijingTime.getMinutes();
                     if (h < 10) h = '0' + h;
                     if (m < 10) m = '0' + m;
-                    
-                    // 更新时间
                     var clockEl = document.getElementById('clock-display');
                     if(clockEl) clockEl.innerHTML = h + ':' + m;
-                    
-                    // 更新日期
                     var mo = beijingTime.getMonth() + 1;
                     var d = beijingTime.getDate();
                     var days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
                     var dateEl = document.getElementById('date-display');
                     if(dateEl) dateEl.innerHTML = mo + '月' + d + '日 · ' + days[beijingTime.getDay()];
-                } catch(e) {
-                    // 如果出错，显示错误信息
-                    document.getElementById('date-display').innerHTML = "时钟错误";
-                }
+                } catch(e) {}
             }
-            
-            // 立即运行一次，然后每秒运行
             updateClock();
             setInterval(updateClock, 1000);
 
+            // --- 2. 页面控制 ---
+            window.openLink = function(url) { window.location.href = url; };
 
-            // --- 2. 全局变量定义 ---
-            var timerInterval = null;
-            var defaultTime = 25 * 60;
-            var timeLeft = defaultTime; 
-            var totalTime = defaultTime;
-            var isRunning = false;
-
-            // --- 3. 全局函数挂载 (让HTML里的onclick能找到这些函数) ---
-            
-            // 外链跳转函数
-            window.openLink = function(url) {
-                window.location.href = url;
-            };
-
-            // 页面切换
             window.goHome = function() {
                 document.getElementById('page-timer').className = 'hidden sub-page-container';
+                document.getElementById('page-poetry').className = 'hidden sub-page-container';
                 document.getElementById('home-page').className = '';
             };
             
@@ -190,9 +175,63 @@
                         updateTimerDisplay();
                     }
                 }
+                if(id === 'page-poetry') {
+                    fetchPoem();
+                }
             };
 
-            // 专注闹钟逻辑
+            // --- 3. 古诗逻辑 (加载 poems.js) ---
+            window.fetchPoem = function() {
+                var contentEl = document.getElementById('poem-content');
+                var infoEl = document.getElementById('poem-info');
+                
+                contentEl.innerHTML = "正在取诗...";
+                infoEl.innerHTML = "...";
+
+                // 优先尝试 API
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://v1.jinrishici.com/all.json', true);
+                xhr.timeout = 2000;
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                var data = JSON.parse(xhr.responseText);
+                                contentEl.innerHTML = data.content;
+                                infoEl.innerHTML = "— " + data.author + " · " + data.origin;
+                            } catch(e) { showLocalPoem(); }
+                        } else { showLocalPoem(); }
+                    }
+                };
+                xhr.ontimeout = function () { showLocalPoem(); };
+                xhr.onerror = function () { showLocalPoem(); };
+                xhr.send();
+            };
+
+            function showLocalPoem() {
+                // 关键点：检查 poems.js 是否加载成功
+                var poemDB = window.myPoemDB;
+                
+                if (!poemDB || poemDB.length === 0) {
+                    // 如果 poems.js 没加载出来，用这个备用的
+                    poemDB = [{ content: "白日依山尽，黄河入海流。", origin: "登鹳雀楼", author: "王之涣" }];
+                }
+                
+                var r = Math.floor(Math.random() * poemDB.length);
+                var poem = poemDB[r];
+                
+                document.getElementById('poem-content').innerHTML = poem.content;
+                document.getElementById('poem-info').innerHTML = "— " + poem.author + " · " + poem.origin;
+            }
+
+            // --- 4. 专注闹钟逻辑 ---
+            var timerInterval = null;
+            var defaultTime = 25 * 60;
+            var timeLeft = defaultTime; 
+            var totalTime = defaultTime;
+            var isRunning = false;
+            
             window.initTimerGrid = function() {
                 var grid = document.getElementById('timer-grid');
                 grid.innerHTML = "";
@@ -205,7 +244,6 @@
                     grid.appendChild(wrapper);
                 }
             };
-
             window.setTimer = function(minutes) {
                 window.pauseTimer();
                 timeLeft = minutes * 60;
@@ -213,65 +251,38 @@
                 updateTimerDisplay();
                 document.getElementById('btn-toggle').innerHTML = "开始";
             };
-
             window.toggleTimer = function() {
                 var btn = document.getElementById('btn-toggle');
-                if (isRunning) {
-                    window.pauseTimer();
-                    btn.innerHTML = "继续";
-                } else {
-                    window.startTimer();
-                    btn.innerHTML = "暂停";
-                }
+                if (isRunning) { window.pauseTimer(); btn.innerHTML = "继续"; } 
+                else { window.startTimer(); btn.innerHTML = "暂停"; }
             };
-
             window.startTimer = function() {
                 if (isRunning) return;
                 isRunning = true;
                 timerInterval = setInterval(function() {
-                    if (timeLeft > 0) { 
-                        timeLeft--; 
-                        updateTimerDisplay(); 
-                    } else { 
-                        window.pauseTimer(); 
-                        document.getElementById('btn-toggle').innerHTML = "开始";
-                        alert("时间到！"); 
-                    }
+                    if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); } 
+                    else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML = "开始"; alert("时间到！"); }
                 }, 1000);
             };
-
-            window.pauseTimer = function() { 
-                clearInterval(timerInterval); 
-                isRunning = false; 
-            };
-
-            window.resetTimer = function() { 
-                window.pauseTimer(); 
-                timeLeft = totalTime; 
-                updateTimerDisplay(); 
-                document.getElementById('btn-toggle').innerHTML = "开始";
-            };
-
+            window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
             window.updateTimerDisplay = function() {
                 var m = Math.floor(timeLeft / 60);
                 var s = timeLeft % 60;
                 if (m < 10) m = '0' + m;
                 if (s < 10) s = '0' + s;
                 document.getElementById('timer-val').innerHTML = m + ':' + s;
-                
                 var dots = document.getElementsByClassName('dot');
                 var totalDots = 60;
                 if (totalTime <= 0) totalTime = 1;
                 var timePassed = totalTime - timeLeft;
                 var grayCount = Math.floor((timePassed / totalTime) * totalDots);
-                
                 for(var i=0; i<totalDots; i++) {
                     if (i < grayCount) dots[i].className = 'dot passed';
                     else dots[i].className = 'dot';
                 }
             };
-            
-        }; // window.onload 结束
+        };
     </script>
 </body>
 </html>
