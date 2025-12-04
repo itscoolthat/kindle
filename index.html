@@ -10,92 +10,71 @@
         .hidden { display: none !important; }
         td { text-align: center; vertical-align: middle; padding: 0; }
         
-        /* --- 2. 首页表格布局 (最稳) --- */
+        /* --- 2. 首页表格布局 --- */
         table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
         .row-home-time { height: 60%; border-bottom: 3px solid black; }
         .row-home-btn { height: 20%; }
 
-        /* 按钮样式 */
+        /* 按钮 */
         .btn-cell { border-right: 1px solid black; border-bottom: 1px solid black; font-weight: bold; cursor: pointer; background: white; font-size: 26px; }
         .btn-cell:active { background: black; color: white; }
         .no-right { border-right: none; } .no-bottom { border-bottom: none; }
 
-        /* 首页组件 */
+        /* 组件 */
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
-
-        /* --- 3. 子页面容器 --- */
         .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
+        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 2px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
         
-        /* 返回按钮 */
-        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 1px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
-        .nav-bar-fixed:active { background: #eee; }
-
-        /* 内容区通用 */
-        .content-area { 
-            padding-top: 80px; height: 100%; box-sizing: border-box; 
-            overflow-y: auto; text-align: center; padding-left: 10px; padding-right: 10px; 
-            position: relative; z-index: 2; /* 保证文字在图片上层 */
-        }
-
-        /* --- 4. 专注闹钟 --- */
+        /* --- 闹钟 --- */
+        .timer-spacer { padding-top: 80px; text-align: center; }
         #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; }
         .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 3px; }
-        .dot.passed { background-color: #e0e0e0; }
+        .dot.passed { background-color: #ddd; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
-        
         .control-area { position: absolute; bottom: 0; width: 100%; height: 30%; border-top: 3px solid black; }
         table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 5. 古诗页面 (含插画逻辑) --- */
-        /* 背景图容器：绝对定位到底部 */
-        #poem-bg-layer {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            opacity: 0.3; /* 透明度30% */
-            z-index: 1; /* 在文字下层 */
-            line-height: 0;
-            pointer-events: none;
+        /* --- 古诗页面 --- */
+        #poem-bg-container {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            z-index: 1; opacity: 0.3; pointer-events: none; display: none; line-height: 0;
         }
-        #poem-bg-img { width: 100%; height: auto; display: none; }
-
-        #poem-date { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 4px; }
+        #poem-bg-img { width: 100%; height: auto; display: block; }
+        #poem-scroll-area {
+            position: absolute; top: 70px; bottom: 0; width: 100%;
+            overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 2;
+        }
         .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: sans-serif; } 
         rt { font-size: 12px; font-weight: normal; color: #555; transform: translateY(-5px); }
-        #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 100px; text-align: center; }
+        #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 40px; text-align: center; }
+        #poem-date { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 4px; }
 
-        /* --- 6. 成语页面 --- */
+        /* --- 成语 --- */
+        .content-area { padding-top: 80px; text-align: center; padding-left: 10px; padding-right: 10px; }
         #idiom-word { font-size: 60px; font-weight: bold; margin-top: 30px; }
         #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 20px; font-family: monospace; }
         #idiom-meaning { font-size: 24px; text-align: left; padding: 20px; border: 2px dashed #999; margin: 20px; background: rgba(255,255,255,0.8); }
-
     </style>
 </head>
 <body>
 
     <div id="home-page" style="width:100%; height:100%;">
         <table class="main-layout">
-            <tr class="row-home-time">
-                <td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td>
-            </tr>
-            <tr class="row-home-btn">
-                <td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td>
-                <td class="btn-cell no-right" onclick="window.location.href='http://frogfind.com'">搜  索 ➚</td>
-            </tr>
-            <tr class="row-home-btn">
-                <td class="btn-cell no-bottom" onclick="showPage('page-poetry')">每日古诗</td>
-                <td class="btn-cell no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td>
-            </tr>
+            <tr class="row-home-time"><td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td></tr>
+            <tr class="row-home-btn"><td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td><td class="btn-cell no-right" onclick="window.location.href='http://frogfind.com'">搜  索 ➚</td></tr>
+            <tr class="row-home-btn"><td class="btn-cell no-bottom" onclick="showPage('page-poetry')">每日古诗</td><td class="btn-cell no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td></tr>
         </table>
     </div>
 
     <div id="page-timer" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         <div style="height: 70%; overflow: hidden; text-align: center;">
-            <div style="padding-top: 80px;"><div id="timer-grid"></div><div id="timer-val">25:00</div></div>
+            <div class="timer-spacer"><div id="timer-grid"></div><div id="timer-val">25:00</div></div>
         </div>
         <div class="control-area">
             <table class="control-layout">
@@ -108,11 +87,11 @@
     <div id="page-poetry" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         
-        <div id="poem-bg-layer">
+        <div id="poem-bg-container">
             <img id="poem-bg-img" src="" alt="">
         </div>
 
-        <div class="content-area">
+        <div id="poem-scroll-area">
             <div id="poem-date">今日古诗</div>
             <div id="poem-container-box"></div>
             <div id="poem-info">...</div>
@@ -131,15 +110,21 @@
 
     <script>
         // =======================================================
-        // 数据区 (请在这里配置图片路径)
+        // 数据区
         // =======================================================
         var myPoemDB = [
             {
                 origin: "回乡偶书", author: "贺知章 (唐)",
                 content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
                 pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
-                // 👇 图片填在这里，只要文件名
                 image: "images/huixiangoushu.png"
+            },
+            {
+                origin: "静夜思", author: "李白 (唐)",
+                content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。",
+                pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。",
+                // 👇 请上传 jingyesi.png 到 images 文件夹
+                image: "images/jingyesi.png" 
             },
             {
                 origin: "咏鹅", author: "骆宾王 (唐)",
@@ -147,7 +132,6 @@
                 pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。",
                 image: ""
             },
-            { origin: "静夜思", author: "李白 (唐)", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。" },
             { origin: "登鹳雀楼", author: "王之涣 (唐)", content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。", pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。" },
             { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。 yè lái fēng yǔ shēng ， huā luò zhī duō shǎo 。" },
             { origin: "悯农", author: "李绅 (唐)", content: "锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。", pinyin: "chú hé rì dāng wǔ ， hàn dī hé xià tǔ 。 shuí zhī pán zhōng cān ， lì lì jiē xīn kǔ 。" }
@@ -160,7 +144,7 @@
             {w:"亡羊补牢", p:"wáng yáng bǔ láo", m:"比喻出了问题以后想办法补救，可以防止继续受损失。"}
         ];
 
-        // --- 逻辑区 ---
+        // --- 逻辑脚本 ---
         window.onload = function() {
             // 1. 时钟
             function updateClock() {
@@ -212,12 +196,14 @@
                 for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
             };
 
-            // 4. 每日古诗 (修复背景图显示)
+            // 4. 每日古诗 (恢复正常逻辑：按日期循环)
             window.loadDailyPoem = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
                     var db = myPoemDB;
+                    // 使用取模运算，每天换一首，自动循环
                     var poem = db[dayOfYear % db.length];
+                    
                     document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
                     renderPoemUI(poem);
                 } catch(e) {}
@@ -226,13 +212,14 @@
                 var box = document.getElementById('poem-container-box'); box.innerHTML = "";
                 document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
                 
-                // 图片逻辑：只修改 src 和 display
+                var bgContainer = document.getElementById('poem-bg-container');
                 var bgImg = document.getElementById('poem-bg-img');
+                
                 if(poem.image && poem.image !== "") { 
                     bgImg.src = poem.image; 
-                    bgImg.style.display = "block"; 
+                    bgContainer.style.display = "block"; 
                 } else { 
-                    bgImg.style.display = "none"; 
+                    bgContainer.style.display = "none"; 
                 }
 
                 var lines = poem.content.split(/([，。？！])/).filter(function(s){return s&&s.trim()!==""});
