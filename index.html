@@ -4,69 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
-    
-    <script src="poems.js"></script>
-    <script src="idioms.js"></script>
-    
     <style>
-        /* --- 全局基础 --- */
+        /* --- Global Reset --- */
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; }
         .hidden { display: none !important; }
         
-        /* 布局 */
-        #top-section { position: absolute; top: 0; left: 0; width: 100%; height: 60%; border-bottom: 3px solid black; display: block; text-align: center; }
-        #clock-wrapper { position: relative; top: 50%; transform: translateY(-50%); -webkit-transform: translateY(-50%); }
-        #bottom-section { position: absolute; top: 60%; left: 0; width: 100%; height: 40%; }
+        /* --- Home Layout (Absolute Positioning) --- */
+        #top-section {
+            position: absolute; top: 0; left: 0; width: 100%; height: 60%;
+            border-bottom: 3px solid black;
+            text-align: center;
+        }
+        /* Center content vertically in top section */
+        #clock-wrapper {
+            position: relative; top: 50%; transform: translateY(-50%); -webkit-transform: translateY(-50%);
+        }
+
+        #bottom-section {
+            position: absolute; top: 60%; left: 0; width: 100%; height: 40%;
+        }
         
-        /* 按钮 */
-        .btn-box { position: absolute; width: 50%; height: 50%; border-right: 1px solid black; border-bottom: 1px solid black; box-sizing: border-box; background: white; font-size: 26px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .btn-box:active { background: black; color: white; }
+        /* Buttons Grid (2x2) */
+        .btn-box {
+            position: absolute; width: 50%; height: 50%;
+            border-right: 1px solid black; border-bottom: 1px solid black;
+            box-sizing: border-box; background: white;
+            font-size: 26px; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+        /* Specific button positioning */
         #btn-1 { top: 0; left: 0; }
         #btn-2 { top: 0; left: 50%; border-right: none; }
         #btn-3 { top: 50%; left: 0; border-bottom: none; }
         #btn-4 { top: 50%; left: 50%; border-right: none; border-bottom: none; }
+        
+        .btn-box:active { background: black; color: white; }
 
-        /* 组件 */
+        /* Components */
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
-        
-        /* 子页面容器 */
-        .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
-        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 1px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
-        .content-box-padded { padding-top: 80px; text-align: center; padding-left: 10px; padding-right: 10px; height: 100%; box-sizing: border-box; position: relative; z-index: 2; }
 
-        /* 闹钟 */
+        /* Sub-page Container */
+        .sub-page-container {
+            width: 100%; height: 100%; background: white;
+            position: absolute; top: 0; left: 0; z-index: 10;
+            overflow: hidden;
+        }
+        
+        /* Nav Bar */
+        .nav-bar-fixed {
+            position: absolute; top: 15px; left: 15px;
+            padding: 8px 20px; border: 1px solid black;
+            background: white; color: black; font-size: 20px; font-weight: bold;
+            cursor: pointer; z-index: 100;
+        }
+        .nav-bar-fixed:active { background: #eee; }
+
+        /* Content Area */
+        .content-box-padded {
+            padding-top: 80px; text-align: center;
+            padding-left: 10px; padding-right: 10px;
+            height: 100%; box-sizing: border-box;
+            position: relative; z-index: 2;
+        }
+
+        /* Timer Styles */
         #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
         .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 3px; }
         .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
+        .timer-spacer { padding-top: 80px; text-align: center; }
+        
+        /* Timer Controls (Table for stability) */
         .control-table { width: 100%; height: 30%; position: absolute; bottom: 0; border-top: 3px solid black; border-collapse: collapse; }
         .control-btn { border: 1px solid black; font-size: 22px; font-weight: bold; text-align: center; cursor: pointer; }
         .control-btn:active { background: black; color: white; }
 
-        /* 古诗页面样式 (沉浸式背景) */
-        #poem-scroll-area { position: absolute; top: 80px; bottom: 0; width: 100%; overflow-y: auto; text-align: center; z-index: 2; }
+        /* Poetry Styles */
+        #poem-scroll-area {
+            position: absolute; top: 80px; bottom: 0; width: 100%;
+            overflow-y: auto; text-align: center; z-index: 2;
+        }
         .poem-line { font-size: 36px; font-weight: bold; line-height: 2.2; white-space: nowrap; margin: 0; }
         ruby { font-family: "Courier New", serif; } 
         rt { font-size: 14px; font-weight: normal; color: #555; transform: translateY(-5px); }
+        #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 40px; }
         .date-badge { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 5px; }
         
-        /* 背景图样式 */
+        /* Immersive Background Image */
         .immersive-bg {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-            opacity: 0.3;
-            z-index: 1;
-            pointer-events: none;
-            display: none;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: auto;
+            opacity: 0.3; z-index: 1; pointer-events: none; display: none;
         }
 
-        /* 成语 */
+        /* Idiom Styles */
         #idiom-word { font-size: 60px; font-weight: bold; margin-top: 20px; }
-        #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 20px; }
+        #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 20px; font-family: "Courier New", monospace; }
         #idiom-meaning { font-size: 24px; text-align: left; border: 2px dashed #999; padding: 15px; background: rgba(255,255,255,0.8); }
     </style>
 </head>
@@ -89,7 +123,7 @@
 
     <div id="page-timer" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
-        <div style="padding-top: 80px; text-align: center;">
+        <div class="timer-spacer">
             <div id="timer-grid"></div>
             <div id="timer-val">25:00</div>
         </div>
@@ -109,13 +143,11 @@
 
     <div id="page-poetry" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
-        
         <img id="poem-bg-image" class="immersive-bg" src="" alt="背景">
-
         <div id="poem-scroll-area">
             <div id="poem-date" class="date-badge">今日古诗</div>
             <div id="poem-container-box"></div>
-            <div id="poem-info" style="font-size:22px; color:#444; margin:30px 0;">...</div>
+            <div id="poem-info">...</div>
         </div>
     </div>
 
@@ -130,8 +162,36 @@
     </div>
 
     <script>
+        // --- Data Section ---
+        var myPoemDB = [
+            {
+                origin: "回乡偶书", author: "贺知章 (唐)",
+                content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
+                pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
+                image: "images/huixiangoushu.png"
+            },
+            {
+                origin: "咏鹅", author: "骆宾王 (唐)",
+                content: "鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。",
+                pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。",
+                image: "" 
+            },
+            { origin: "静夜思", author: "李白 (唐)", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。" },
+            { origin: "登鹳雀楼", author: "王之涣 (唐)", content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。", pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。" },
+            { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。 yè lái fēng yǔ shēng ， huā luò zhī duō shǎo 。" },
+            { origin: "悯农", author: "李绅 (唐)", content: "锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。", pinyin: "chú hé rì dāng wǔ ， hàn dī hé xià tǔ 。 shuí zhī pán zhōng cān ， lì lì jiē xīn kǔ 。" }
+        ];
+
+        var myIdiomDB = [
+            {w:"守株待兔", p:"shǒu zhū dài tù", m:"比喻死守狭隘经验，不知变通，或妄想不劳而获。"},
+            {w:"掩耳盗铃", p:"yǎn ěr dào líng", m:"比喻自己欺骗自己，明明掩盖不住的事情偏要想法子掩盖。"},
+            {w:"画蛇添足", p:"huà shé tiān zú", m:"比喻做了多余的事，非但无益，反而不合适。"},
+            {w:"亡羊补牢", p:"wáng yáng bǔ láo", m:"比喻出了问题以后想办法补救，可以防止继续受损失。"}
+        ];
+
+        // --- Logic Section ---
         window.onload = function() {
-            // 1. 时钟
+            // 1. Clock
             function updateClock() {
                 try {
                     var now = new Date();
@@ -147,7 +207,7 @@
             }
             updateClock(); setInterval(updateClock, 1000);
 
-            // 2. 页面控制
+            // 2. Navigation
             window.openLink = function(url) { window.location.href = url; };
             window.goHome = function() {
                 var pages = ['page-timer', 'page-poetry', 'page-idiom'];
@@ -162,7 +222,7 @@
                 if(id === 'page-idiom') loadDailyIdiom();
             };
 
-            // 3. 闹钟
+            // 3. Timer Logic
             var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
             window.initTimerGrid = function() {
                 var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
@@ -182,16 +242,15 @@
                 for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
             };
 
-            // 4. 古诗
+            // 4. Poetry Logic
             window.loadDailyPoem = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
-                    // 读取外部的 poems.js
-                    var db = window.myPoemDB || [{content:"数据加载中..."}];
+                    var db = myPoemDB;
                     var poem = db[dayOfYear % db.length];
                     document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
                     renderPoemUI(poem);
-                } catch(e) { alert("古诗加载失败"); }
+                } catch(e) { alert("古诗加载失败: " + e); }
             };
             function renderPoemUI(poem) {
                 var box = document.getElementById('poem-container-box'); box.innerHTML = "";
@@ -199,8 +258,7 @@
                 
                 var bgImgEl = document.getElementById('poem-bg-image');
                 if(poem.image && poem.image !== "") { 
-                    bgImgEl.src = poem.image; 
-                    bgImgEl.style.display = "block"; 
+                    bgImgEl.src = poem.image; bgImgEl.style.display = "block"; 
                 } else { 
                     bgImgEl.style.display = "none"; 
                 }
@@ -224,13 +282,11 @@
                 }
             }
 
-            // 5. 成语
+            // 5. Idiom Logic
             window.loadDailyIdiom = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
-                    // 读取外部的 idioms.js
-                    var db = window.myIdiomDB || [{w:"加载中"}];
-                    var item = db[dayOfYear % db.length];
+                    var item = myIdiomDB[dayOfYear % myIdiomDB.length];
                     document.getElementById('idiom-word').innerHTML = item.w;
                     document.getElementById('idiom-pinyin').innerHTML = item.p;
                     document.getElementById('idiom-meaning').innerHTML = "<b>释义：</b>" + item.m;
