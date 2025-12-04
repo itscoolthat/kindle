@@ -26,10 +26,10 @@
         .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
         .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 2px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
         
-        /* --- 闹钟 (已修复点点对齐) --- */
+        /* --- 闹钟 --- */
         .timer-spacer { padding-top: 80px; text-align: center; }
         #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
-        /* 关键：给每个点加一个壳子，强制一行显示20个 */
+        /* 强制一行20个点 */
         .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
         .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
         .dot.passed { background-color: #ddd; }
@@ -40,21 +40,26 @@
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 古诗页面 (沉浸式背景) --- */
+        /* --- 古诗页面 (修复Kindle居中问题) --- */
         #poem-bg-container {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            z-index: 1; /* 在最底层 */
-            opacity: 0.3; /* 透明度 */
-            pointer-events: none; display: none; line-height: 0;
+            z-index: 1; opacity: 0.3; pointer-events: none; display: none; line-height: 0;
         }
         #poem-bg-img { width: 100%; height: auto; display: block; }
         
         #poem-scroll-area {
             position: absolute; top: 70px; bottom: 0; width: 100%;
-            overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2; /* 在图片上层 */
+            overflow-y: auto;
+            text-align: center;
+            padding-top: 40px;
+            box-sizing: border-box;
+            z-index: 2;
         }
-        .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
+        .poem-line { 
+            font-size: 34px; font-weight: bold; line-height: 2.2; 
+            margin: 0; white-space: nowrap;
+            width: 100%; text-align: center;
+        }
         ruby { font-family: sans-serif; } 
         rt { font-size: 12px; font-weight: normal; color: #555; transform: translateY(-5px); }
         #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 40px; text-align: center; }
@@ -92,11 +97,7 @@
 
     <div id="page-poetry" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
-        
-        <div id="poem-bg-container">
-            <img id="poem-bg-img" src="" alt="">
-        </div>
-
+        <div id="poem-bg-container"><img id="poem-bg-img" src="" alt=""></div>
         <div id="poem-scroll-area">
             <div id="poem-date">随机古诗</div>
             <div id="poem-container-box"></div>
@@ -232,7 +233,8 @@
             { origin: "七步诗", author: "曹植 (魏)", content: "煮豆燃豆萁，豆在釜中泣。本是同根生，相煎何太急？", pinyin: "zhǔ dòu rán dòu qí ， dòu zài fǔ zhōng qì 。 běn shì tóng gēn shēng ， xiāng jiān hé tài jí ？", image: "" },
             { origin: "长歌行 (节选)", author: "汉乐府", content: "百川东到海，何时复西归？少壮不努力，老大徒伤悲。", pinyin: "bǎi chuān dōng dào hǎi ， hé shí fù xī guī ？ shào zhuàng bù nǔ lì ， lǎo dà tú shāng bēi 。", image: "" }
         ];
-// =======================================================
+
+        // =======================================================
         // 成语数据区 (共105个精选)
         // =======================================================
         var myIdiomDB = [
@@ -350,7 +352,26 @@
             {w:"风度翩翩", p:"fēng dù piān piān", m:"形容举止洒脱。"},
             {w:"落落大方", p:"luò luò dà fāng", m:"形容言谈举止自然大方。"},
             {w:"神采奕奕", p:"shén cǎi yì yì", m:"形容精神旺盛，容光焕发。"},
-            {w:"威风凛凛", p:"wēi fēng lǐn lǐn", m:"形容声势或气派使人敬畏。"}
+            {w:"威风凛凛", p:"wēi fēng lǐn lǐn", m:"形容声势或气派使人敬畏。"},
+            {w:"兢兢业业", p:"jīng jīng yè yè", m:"形容做事小心谨慎，认真踏实。"},
+            {w:"循规蹈矩", p:"xún guī dǎo jǔ", m:"原指遵守规矩，不敢违反。现也指拘守旧准则，不敢稍有变动。"},
+            {w:"一丝不苟", p:"yī sī bù gǒu", m:"指做事认真细致，一点儿不马虎。"},
+            {w:"粗心大意", p:"cū xīn dà yì", m:"指做事马虎，不细心。"},
+            {w:"马马虎虎", p:"mǎ mǎ hū hū", m:"指还过得去。亦形容做事不认真，不仔细。"},
+            {w:"敷衍了事", p:"fū yǎn liǎo shì", m:"指办事马马虎虎，只求应付过去就算完事。"},
+            {w:"得过且过", p:"dé guò qiě guò", m:"只要能够过得去，就这样过下去。形容胸无大志。"},
+            {w:"精益求精", p:"jīng yì qiú jīng", m:"已经很好了，还要求更好。"},
+            {w:"锦上添花", p:"jǐn shàng tiān huā", m:"比喻在原有成就的基础上进一步完善。"},
+            {w:"雪中送炭", p:"xuě zhōng sòng tàn", m:"比喻在别人急需时给以物质上或精神上的帮助。"},
+            {w:"助人为乐", p:"zhù rén wéi lè", m:"把帮助别人当做一件快乐的事。"},
+            {w:"见义勇为", p:"jiàn yì yǒng wéi", m:"看到正义的事，就勇敢地去做。"},
+            {w:"袖手旁观", p:"xiù shǒu páng guān", m:"比喻置身事外，既不过问，也不协助。"},
+            {w:"幸灾乐祸", p:"xìng zāi lè huò", m:"指人缺乏善意，在别人遇到灾祸时感到高兴。"},
+            {w:"落井下石", p:"luò jǐng xià shí", m:"看见人掉进井里，不伸手救他，反而往井下扔石头。"},
+            {w:"同舟共济", p:"tóng zhōu gòng jì", m:"坐一条船，共同渡河。比喻团结互助，同心协力，战胜困难。"},
+            {w:"志同道合", p:"zhì tóng dào hé", m:"志趣相同，意见一致。"},
+            {w:"貌合神离", p:"mào hé shén lí", m:"表面上关系很密切，实际上是两条心。"},
+            {w:"同床异梦", p:"tóng chuáng yì mèng", m:"比喻虽然共同生活或者同做一件事情，但是各人的想法不同。"}
         ];
 
         // --- 逻辑脚本 ---
