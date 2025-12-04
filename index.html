@@ -5,99 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
     <style>
-        /* --- 全局基础 --- */
+        /* --- 全局样式 --- */
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; }
         .hidden { display: none !important; }
+        td { text-align: center; vertical-align: middle; padding: 0; }
         
         /* 布局 */
-        #top-section { position: absolute; top: 0; left: 0; width: 100%; height: 60%; border-bottom: 3px solid black; display: block; text-align: center; }
-        #clock-wrapper { position: relative; top: 50%; transform: translateY(-50%); -webkit-transform: translateY(-50%); }
-        #bottom-section { position: absolute; top: 60%; left: 0; width: 100%; height: 40%; }
+        table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-home-time { height: 60%; border-bottom: 3px solid black; }
+        .row-home-btn { height: 20%; }
         
-        /* 按钮 */
-        .btn-box { position: absolute; width: 50%; height: 50%; border-right: 1px solid black; border-bottom: 1px solid black; box-sizing: border-box; background: white; font-size: 26px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .btn-box:active { background: black; color: white; }
-        #btn-1 { top: 0; left: 0; }
-        #btn-2 { top: 0; left: 50%; border-right: none; }
-        #btn-3 { top: 50%; left: 0; border-bottom: none; }
-        #btn-4 { top: 50%; left: 50%; border-right: none; border-bottom: none; }
-
-        /* 组件 */
+        /* 时钟 */
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
-        
-        /* 子页面 */
-        .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; }
-        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 1px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
-        .content-box-padded { padding-top: 80px; text-align: center; padding-left: 10px; padding-right: 10px; height: 100%; box-sizing: border-box; }
 
-        /* 闹钟 */
+        /* 按钮 */
+        .btn-cell { border-right: 1px solid black; border-bottom: 1px solid black; font-weight: bold; cursor: pointer; background: white; text-align: center; vertical-align: middle; }
+        .btn-cell:active { background: black; color: white; }
+        .no-right { border-right: none; } .no-bottom { border-bottom: none; }
+        .home-btn-font { font-size: 26px; } .preset-btn-font { font-size: 20px; } .action-btn-font { font-size: 26px; }
+
+        /* 顶部栏 */
+        .sub-page-container { width: 100%; height: 100%; background: white; position: relative; }
+        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 1px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
+        .nav-bar-fixed:active { background: #eee; }
+
+        /* 闹钟页 */
+        table.timer-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-timer-display { height: 70%; } .row-timer-control { height: 30%; border-top: 3px solid black; }
+        table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-control-preset { height: 50%; } .row-control-action { height: 50%; }
         #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
-        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 3px; }
+        .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
         .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
-        
-        /* 闹钟控制 */
-        .control-table { width: 100%; height: 30%; position: absolute; bottom: 0; border-top: 3px solid black; border-collapse: collapse; }
-        .control-btn { border: 1px solid black; font-size: 22px; font-weight: bold; text-align: center; cursor: pointer; }
-        .control-btn:active { background: black; color: white; }
+        .timer-spacer { padding-top: 80px; }
 
-        /* 古诗 */
-        #poem-scroll-area { position: absolute; top: 80px; bottom: 80px; width: 100%; overflow-y: auto; text-align: center; }
-        .poem-line { font-size: 36px; font-weight: bold; line-height: 2.2; white-space: nowrap; margin: 0; }
+        /* 古诗页 */
+        #poem-scroll-area { position: absolute; top: 70px; bottom: 70px; width: 100%; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #poem-image { width: 120px; height: 120px; margin-bottom: 20px; display: none; margin-top: 10px;}
+        .poem-line { font-size: 36px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: "Courier New", serif; } 
         rt { font-size: 14px; font-weight: normal; color: #555; transform: translateY(-5px); }
+        #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 20px; text-align: center; }
         .poem-control-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; border-top: 1px solid black; display: flex; }
-        .poem-btn { flex: 1; height: 100%; font-size: 22px; font-weight: bold; border-right: 1px solid black; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        
-        /* 成语 */
-        #idiom-word { font-size: 60px; font-weight: bold; margin-top: 20px; }
-        #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 20px; }
-        #idiom-meaning { font-size: 24px; text-align: left; border: 2px dashed #999; padding: 15px; }
+        .poem-btn { flex: 1; height: 100%; font-size: 22px; font-weight: bold; border-right: 1px solid black; background: white; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .poem-btn:last-child { border-right: none; }
+        .poem-btn:active { background: black; color: white; }
+
+        /* 成语页 */
+        .content-box-padded { padding-top: 80px; text-align: center; padding-left: 10px; padding-right: 10px; height: 100%; box-sizing: border-box; }
+        #idiom-word { font-size: 60px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; letter-spacing: 5px; }
+        #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 30px; font-family: "Courier New", Courier, monospace; }
+        #idiom-meaning { font-size: 24px; text-align: left; line-height: 1.6; border: 2px dashed #999; padding: 20px; border-radius: 10px; }
+        .date-badge { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="home-page">
-        <div id="top-section">
-            <div id="clock-wrapper">
-                <div id="clock-display">00:00</div>
-                <div id="date-display">正在启动...</div>
-            </div>
-        </div>
-        <div id="bottom-section">
-            <div id="btn-1" class="btn-box" onclick="showPage('page-timer')">专注闹钟</div>
-            <div id="btn-2" class="btn-box" onclick="window.location.href='http://frogfind.com'">搜  索 ➚</div>
-            <div id="btn-3" class="btn-box" onclick="showPage('page-poetry')">古诗赏析</div>
-            <div id="btn-4" class="btn-box" onclick="showPage('page-idiom')">每日成语</div>
-        </div>
+    <div id="home-page" style="width:100%; height:100%;">
+        <table class="main-layout">
+            <tr class="row-home-time">
+                <td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td>
+            </tr>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
+                <td class="btn-cell home-btn-font no-right" onclick="openLink('http://frogfind.com')">搜  索</td>
+            </tr>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font no-bottom" onclick="showPage('page-poetry')">古诗赏析</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td>
+            </tr>
+        </table>
     </div>
 
     <div id="page-timer" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
-        <div style="padding-top: 80px; text-align: center;">
-            <div id="timer-grid"></div>
-            <div id="timer-val">25:00</div>
-        </div>
-        <table class="control-table">
-            <tr style="height:50%">
-                <td class="control-btn" onclick="setTimer(2)">2分</td>
-                <td class="control-btn" onclick="setTimer(15)">15分</td>
-                <td class="control-btn" onclick="setTimer(30)">30分</td>
-                <td class="control-btn" onclick="setTimer(60)">60分</td>
+        <table class="timer-layout">
+            <tr class="row-timer-display">
+                <td><div class="timer-spacer"><div id="timer-grid"></div><div id="timer-val">25:00</div></div></td>
             </tr>
-            <tr style="height:50%">
-                <td class="control-btn" id="btn-toggle" onclick="toggleTimer()">开始</td>
-                <td class="control-btn" onclick="resetTimer()">重置</td>
-            </tr>
+            <tr class="row-timer-control"><td><table class="control-layout"><tr class="row-control-preset"><td class="btn-cell preset-btn-font" onclick="setTimer(2)">2分</td><td class="btn-cell preset-btn-font" onclick="setTimer(15)">15分</td><td class="btn-cell preset-btn-font" onclick="setTimer(30)">30分</td><td class="btn-cell preset-btn-font no-right" onclick="setTimer(60)">60分</td></tr><tr class="row-control-action"><td class="btn-cell action-btn-font no-bottom" id="btn-toggle" onclick="toggleTimer()">开始</td><td class="btn-cell action-btn-font no-right no-bottom" onclick="resetTimer()">重置</td></tr></table></td></tr>
         </table>
     </div>
 
     <div id="page-poetry" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         <div id="poem-scroll-area">
-            <div id="poem-container-box"></div>
-            <div id="poem-info" style="font-size:22px; color:#444; margin:30px 0;">...</div>
+            <img id="poem-image" src="" alt="插画">
+            <div id="poem-container-box" style="text-align: center;"></div>
+            <div id="poem-info">...</div>
         </div>
         <div class="poem-control-bar">
             <div class="poem-btn" onclick="startSearch()">🔍 搜 索</div>
@@ -108,7 +106,7 @@
     <div id="page-idiom" class="hidden sub-page-container">
         <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         <div class="content-box-padded">
-            <div style="background:black; color:white; padding:5px 10px; display:inline-block;">今日成语</div>
+            <div id="idiom-date" class="date-badge">今日成语</div>
             <div id="idiom-word">...</div>
             <div id="idiom-pinyin">...</div>
             <div id="idiom-meaning">...</div>
@@ -116,9 +114,198 @@
     </div>
 
     <script>
-        // --- 数据区 (内置，防丢) ---
+        // ==========================================
+        // 数据区 (请小心修改引号和逗号)
+        // ==========================================
         var myPoemDB = [
-            { origin: "咏鹅", author: "骆宾王 (唐)", content: "鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。", pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。" },
-            { origin: "静夜思", author: "李白 (唐)", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。" },
-            { origin: "登鹳雀楼", author: "王之涣 (唐)", content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。", pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。" },
-            { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。
+            {
+                origin: "咏鹅", author: "骆宾王 (唐)",
+                content: "鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。",
+                pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDY0IDQ0OGgtNTUuMjNIMzkydjMyYzAgOC44NC03LjE2IDE2LTE2IDE2aC0zMmMtOC44NCAwLTE2LTcuMTYtMTYtMTZ2LTMySDk2di0zMmMwLTMzLjA5IDI1LjQyLTYwLjI5IDU4LTYyLjkzVjM1MmMwLTUzLjA0IDQyLjk2LTk2IDk2LTk2aDMxLjM1Yzc5Ljg0IDAgMTQ0Ljg4LTYyLjg0IDE0OC40MS0xNDEuMTlMNDMzLjY1IDk2SDQ2NGExNiAxNiAwIDAgMCAxNi0xNlY0OGExNiAxNiAwIDAgMC0xNi0xNkgxNzZhMTYgMTYgMCAwIDAtMTYgMTZ2MzJhMTYgMTYgMCAwIDAgMTYgMTZoMTA5LjkxYy0xNC44MiA2MS4zLTc0LjUgMTA1LjI1LTE0MS45MSAxMDUuMjVoLTMwYy04MC44OSAwLTE0Ni44IDYyLjg5LTE1MS44NCAxNDIuNTVDMTkuMTEgMzc5LjQyIDAgNDI3LjY1IDAgNDgwYTE2IDE2IDAgMCAwIDE2IDE2aDM2OGE0OCA0OCAwIDAgMCA0OC00OGgzMmExNiAxNiAwIDAgMCAxNi0xNnYtMzJhMTYgMTYgMCAwIDAtMTYtMTZ6TTI1NiAyODhjLTI2LjUxIDAtNDgtMjEuNDktNDgtNDhzMjEuNDktNDggNDgtNDggNDggMjEuNDkgNDggNDggNDggNDggNDggNDh6Ii8+PC9zdmc+"
+            },
+            {
+                origin: "静夜思", author: "李白 (唐)",
+                content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。",
+                pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNMjgzLjIxIDUxMmMxNTUuMzkgMCAyODAuMzYtMTMyLjYxIDI3Ni40Ny0yODkuMTJDLDU1Ni43NyAxMTUuNTcgNDcxLjYyIDE5LjE4IDM2My45OCAwYzE5LjQ4IDAgMzUuNTkgMTguNjcgMzEuMzcgMzguNTQtMTkuMzEgOTAuOTEtODUuNDggMTY4Ljg1LTE3Ny4xMyAxOTcuNDgtODguOTMgMjcuNzgtMTgxLjg1IDguMzUtMjQ5LjE0LTM5LjI3LTE0LjcxLTEwLjQyLTM0LjY3LTEuNzQtMzEuMzcgMTcuMTRDMjcuMDggNDEzLjM5IDE0My43MSA1MTIgMjgzLjIxIDUxMnoiLz48L3N2Zz4="
+            },
+            {
+                origin: "登鹳雀楼", author: "王之涣 (唐)",
+                content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。",
+                pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48cGF0aCBkPSJNMTkyIDM4NGgtMzcuNTlsLTY5LjUxLTEzOS4wMkMxMDMuNjkgMjgyLjIxIDYyLjg5IDMxNy44NiAwIDM2OC4yOVY0NjRjMCAyNi41MSAyMS40OSA0OCA0OCA0OGg1NDRjMjYuNTEgMCA0OC0yMS40OSA0OC00OHYtNTYuNDVjLTg1LjcxLTgzLjU2LTEzNy0xODUuNzQtMTgzLjg5LTI3OC4xNi00LjY2LTkuMTgtMTYuNzItMTIuNDItMjUuMzItNi44QzM2MS4zIDE2Mi44IDMxMS4wMSAyNDIuMDkgMjU4IDI4OC4wNkwxOTIgMzg0em0zMDQuMTEgMzJjLTM5Ljg4LTU1LjA0LTgyLjQxLTEyNi4yMi0xMzEuMzktMjIyLjc4IDE5LjYzLTI4LjYgNDEuMDItNTIuMDQgNTguNTYtNTkuNzkgMTIuMDUtNS4zMyAyNS44LTQuMDkgMzYuNjEgMy4zMkw2MTIuMTEgMjQ4QzU0Ny41OSAzMTMuMjUgNDg0LjY0IDM4My44MSA0OTYuMTEgNDE2eiIvPjwvc3dmz4="
+            },
+            { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。 yè lái fēng yǔ shēng ， huā luò zhī duō shǎo 。" },
+            { origin: "寻隐者不遇", author: "贾岛 (唐)", content: "松下问童子，言师采药去。只在此山中，云深不知处。", pinyin: "sōng xià wèn tóng zǐ ， yán shī cǎi yào qù 。 zhǐ zài cǐ shān zhōng ， yún shēn bù zhī chù 。" },
+            { origin: "悯农", author: "李绅 (唐)", content: "锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。", pinyin: "chú hé rì dāng wǔ ， hàn dī hé xià tǔ 。 shuí zhī pán zhōng cān ， lì lì jiē xīn kǔ 。" },
+            { origin: "相思", author: "王维 (唐)", content: "红豆生南国，春来发几枝。愿君多采撷，此物最相思。", pinyin: "hóng dòu shēng nán guó ， chūn lái fā jǐ zhī 。 yuàn jūn duō cǎi xié ， cǐ wù zuì xiāng sī 。" },
+            { origin: "赋得古原草送别", author: "白居易 (唐)", content: "离离原上草，一岁一枯荣。野火烧不尽，春风吹又生。", pinyin: "lí lí yuán shàng cǎo ， yī suì yī kū róng 。 yě huǒ shāo bù jìn ， chūn fēng chuī yòu shēng 。" },
+            { origin: "回乡偶书", author: "贺知章 (唐)", content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。", pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。" },
+            { origin: "咏柳", author: "贺知章 (唐)", content: "碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出，二月春风似剪刀。", pinyin: "bì yù zhuāng chéng yī shù gāo ， wàn tiáo chuí xià lǜ sī tāo 。 bù zhī xì yè shuí cái chū ， èr yuè chūn fēng sì jiǎn dāo 。" },
+            { origin: "绝句", author: "杜甫 (唐)", content: "两个黄鹂鸣翠柳，一行白鹭上青天。窗含西岭千秋雪，门泊东吴万里船。", pinyin: "liǎng gè huáng lí míng cuì liǔ ， yī háng bái lù shàng qīng tiān 。 chuāng hán xī lǐng qiān qiū xuě ， mén bó dōng wú wàn lǐ chuán 。" },
+            { origin: "夜宿山寺", author: "李白 (唐)", content: "危楼高百尺，手可摘星辰。不敢高声语，恐惊天上人。", pinyin: "wēi lóu gāo bǎi chǐ ， shǒu kě zhāi xīng chén 。 bù gǎn gāo shēng yǔ ， kǒng jīng tiān shàng rén 。" },
+            { origin: "古朗月行", author: "李白 (唐)", content: "小时不识月，呼作白玉盘。又疑瑶台镜，飞在青云端。", pinyin: "xiǎo shí bù shí yuè ， hū zuò bái yù pán 。 yòu yí yáo tái jìng ， fēi zài qīng yún duān 。" },
+            { origin: "风", author: "李峤 (唐)", content: "解落三秋叶，能开二月花。过江千尺浪，入竹万竿斜。", pinyin: "jiě luò sān qiū yè ， néng kāi èr yuè huā 。 guò jiāng qiān chǐ làng ， rù zhú wàn gān xié 。" },
+            { origin: "送孟浩然之广陵", author: "李白 (唐)", content: "故人西辞黄鹤楼，烟花三月下扬州。孤帆远影碧空尽，唯见长江天际流。", pinyin: "gù rén xī cí huáng hè lóu ， yān huā sān yuè xià yáng zhōu 。 gū fān yuǎn yǐng bì kōng jìn ， wéi jiàn cháng jiāng tiān jì liú 。" },
+            { origin: "早发白帝城", author: "李白 (唐)", content: "朝辞白帝彩云间，千里江陵一日还。两岸猿声啼不住，轻舟已过万重山。", pinyin: "zhāo cí bái dì cǎi yún jiān ， qiān lǐ jiāng líng yī rì huán 。 liǎng àn yuán shēng tí bù zhù ， qīng zhōu yǐ guò wàn chóng shān 。" },
+            { origin: "望庐山瀑布", author: "李白 (唐)", content: "日照香炉生紫烟，遥看瀑布挂前川。飞流直下三千尺，疑是银河落九天。", pinyin: "rì zhào xiāng lú shēng zǐ yān ， yáo kàn pù bù guà qián chuān 。 fēi liú zhí xià sān qiān chǐ ， yí shì yín hé luò jiǔ tiān 。" },
+            { origin: "江雪", author: "柳宗元 (唐)", content: "千山鸟飞绝，万径人踪灭。孤舟蓑笠翁，独钓寒江雪。", pinyin: "qiān shān niǎo fēi jué ， wàn jìng rén zōng miè 。 gū zhōu suō lì wēng ， dú diào hán jiāng xuě 。" },
+            { origin: "游子吟", author: "孟郊 (唐)", content: "慈母手中线，游子身上衣。临行密密缝，意恐迟迟归。谁言寸草心，报得三春晖。", pinyin: "cí mǔ shǒu zhōng xiàn ， yóu zǐ shēn shàng yī 。 lín xíng mì mì féng ， yì kǒng chí chí guī 。 shuí yán cùn cǎo xīn ， bào dé sān chūn huī 。" },
+            { origin: "敕勒歌", author: "北朝民歌", content: "敕勒川，阴山下。天似穹庐，笼盖四野。天苍苍，野茫茫。风吹草低见牛羊。", pinyin: "chì lè chuān ， yīn shān xià 。 tiān sì qióng lú ， lǒng gài sì yě 。 tiān cāng cāng ， yě máng máng 。 fēng chuī cǎo dī xiàn niú yáng 。" },
+            { origin: "画", author: "王维 (唐)", content: "远看山有色，近听水无声。春去花还在，人来鸟不惊。", pinyin: "yuǎn kàn shān yǒu sè ， jìn tīng shuǐ wú shēng 。 chūn qù huā hái zài ， rén lái niǎo bù jīng 。" },
+            { origin: "一去二三里", author: "邵康节 (宋)", content: "一去二三里，烟村四五家。亭台六七座，八九十枝花。", pinyin: "yī qù èr sān lǐ ， yān cūn sì wǔ jiā 。 tíng tái liù qī zuò ， bā jiǔ shí zhī huā 。" }
+        ];
+
+        var myIdiomDB = [
+            {w:"守株待兔", p:"shǒu zhū dài tù", m:"比喻死守狭隘经验，不知变通，或妄想不劳而获。"},
+            {w:"掩耳盗铃", p:"yǎn ěr dào líng", m:"比喻自己欺骗自己，明明掩盖不住的事情偏要想法子掩盖。"},
+            {w:"画蛇添足", p:"huà shé tiān zú", m:"比喻做了多余的事，非但无益，反而不合适。"},
+            {w:"亡羊补牢", p:"wáng yáng bǔ láo", m:"比喻出了问题以后想办法补救，可以防止继续受损失。"},
+            {w:"井底之蛙", p:"jǐng dǐ zhī wā", m:"比喻见识狭窄的人。"},
+            {w:"刻舟求剑", p:"kè zhōu qiú jiàn", m:"比喻不懂事物已发展变化而仍静止地看问题。"},
+            {w:"对牛弹琴", p:"duì niú tán qín", m:"比喻对不讲道理的人讲道理，也用来讥笑说话不看对象。"},
+            {w:"狐假虎威", p:"hú jiǎ hǔ wēi", m:"比喻依仗别人的势力欺压人。"},
+            {w:"拔苗助长", p:"bá miáo zhù zhǎng", m:"比喻违反事物发展的客观规律，急于求成，反而把事情弄糟。"},
+            {w:"杯弓蛇影", p:"bēi gōng shé yǐng", m:"比喻因疑神疑鬼而引起恐惧。"},
+            {w:"盲人摸象", p:"máng rén mō xiàng", m:"比喻对事物只凭片面的了解或局部的经验，就乱加猜测。"},
+            {w:"自相矛盾", p:"zì xiāng máo dùn", m:"比喻自己说话做事前后抵触。"},
+            {w:"滥竽充数", p:"làn yú chōng shù", m:"比喻没有真才实学的人混在行家里面充数。"},
+            {w:"老马识途", p:"lǎo mǎ shí tú", m:"比喻有经验的人熟悉情况，能起引导作用。"},
+            {w:"精卫填海", p:"jīng wèi tián hǎi", m:"比喻意志坚决，不畏艰难。"},
+            {w:"愚公移山", p:"yú gōng yí shān", m:"比喻坚持不懈地改造自然和坚定不移地进行斗争。"},
+            {w:"闻鸡起舞", p:"wén jī qǐ wǔ", m:"比喻有志报国的人及时奋起。"},
+            {w:"悬梁刺股", p:"xuán liáng cì gǔ", m:"形容刻苦学习。"},
+            {w:"凿壁偷光", p:"záo bì tōu guāng", m:"形容家贫而读书刻苦。"},
+            {w:"程门立雪", p:"chéng mén lì xuě", m:"形容尊师重道，虔诚求教。"},
+            {w:"三顾茅庐", p:"sān gù máo lú", m:"比喻诚心诚意地邀请人家。"},
+            {w:"望梅止渴", p:"wàng méi zhǐ kě", m:"比喻愿望无法实现，用空想安慰自己。"},
+            {w:"四面楚歌", p:"sì miàn chǔ gē", m:"形容四面受敌，孤立无援的困境。"},
+            {w:"草木皆兵", p:"cǎo mù jiē bīng", m:"形容人在惊慌时疑神疑鬼。"},
+            {w:"纸上谈兵", p:"zhǐ shàng tán bīng", m:"比喻空谈理论，不能解决实际问题。"},
+            {w:"负荆请罪", p:"fù jīng qǐng zuì", m:"表示向人认错赔罪。"},
+            {w:"完璧归赵", p:"wán bì guī zhào", m:"比喻把物品完好地归还给物品的主人。"},
+            {w:"卧薪尝胆", p:"wò xīn cháng dǎn", m:"形容人刻苦自励，发愤图强。"},
+            {w:"一鸣惊人", p:"yī míng jīng rén", m:"比喻平时没有特殊表现，一做起来就有惊人的成绩。"},
+            {w:"胸有成竹", p:"xiōng yǒu chéng zhú", m:"比喻做事之前已经有通盘的考虑。"}
+        ];
+
+        // ==========================================
+        // 核心逻辑区 (安全模式)
+        // ==========================================
+        window.onload = function() {
+            
+            // --- 1. 时钟 ---
+            function updateClock() {
+                try {
+                    var now = new Date();
+                    var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    var beijingTime = new Date(utc + (3600000 * 8));
+                    var h = beijingTime.getHours(); var m = beijingTime.getMinutes();
+                    if(h<10) h="0"+h; if(m<10) m="0"+m;
+                    document.getElementById('clock-display').innerHTML = h + ":" + m;
+                    var mo = beijingTime.getMonth()+1; var d = beijingTime.getDate();
+                    var days = ["周日","周一","周二","周三","周四","周五","周六"];
+                    document.getElementById('date-display').innerHTML = mo+"月"+d+"日 · "+days[beijingTime.getDay()];
+                } catch(e) { console.log(e); }
+            }
+            updateClock(); setInterval(updateClock, 1000);
+
+            // --- 2. 页面控制 ---
+            window.openLink = function(url) { window.location.href = url; };
+            window.goHome = function() {
+                var pages = ['page-timer', 'page-poetry', 'page-idiom'];
+                for(var i=0; i<pages.length; i++) { document.getElementById(pages[i]).className = 'hidden sub-page-container'; }
+                document.getElementById('home-page').className = '';
+            };
+            window.showPage = function(id) {
+                document.getElementById('home-page').className = 'hidden';
+                document.getElementById(id).className = 'sub-page-container';
+                if(id === 'page-timer' && document.getElementById('timer-grid').innerHTML === "") initTimerGrid();
+                if(id === 'page-poetry') showLocalPoem();
+                if(id === 'page-idiom') loadDailyIdiom();
+            };
+
+            // --- 3. 闹钟逻辑 ---
+            var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
+            window.initTimerGrid = function() {
+                var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
+                for(var i=0; i<60; i++) { 
+                    var w = document.createElement('div'); w.className = 'dot-wrapper';
+                    var d = document.createElement('div'); d.className='dot'; 
+                    w.appendChild(d); grid.appendChild(w); 
+                }
+            };
+            window.setTimer = function(m) { window.pauseTimer(); timeLeft = m*60; totalTime = timeLeft; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
+            window.toggleTimer = function() { if(isRunning) { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="继续"; } else { window.startTimer(); document.getElementById('btn-toggle').innerHTML="暂停"; } };
+            window.startTimer = function() { if(isRunning) return; isRunning = true; timerInterval = setInterval(function() { if(timeLeft>0) { timeLeft--; updateTimerDisplay(); } else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="开始"; alert("时间到"); } }, 1000); };
+            window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML="开始"; };
+            window.updateTimerDisplay = function() {
+                var m = Math.floor(timeLeft/60); var s = timeLeft%60;
+                if(m<10) m="0"+m; if(s<10) s="0"+s;
+                document.getElementById('timer-val').innerHTML = m+":"+s;
+                var dots = document.getElementsByClassName('dot');
+                var grayCount = Math.floor(((totalTime-timeLeft)/totalTime)*60);
+                for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
+            };
+
+            // --- 4. 古诗逻辑 (隔离保护) ---
+            window.showLocalPoem = function() {
+                try {
+                    var r = Math.floor(Math.random() * myPoemDB.length);
+                    renderPoemUI(myPoemDB[r]);
+                } catch(e) { alert("古诗数据有误"); }
+            };
+            window.startSearch = function() {
+                var input = prompt("搜古诗(如:李白):");
+                if(!input) return;
+                var res = myPoemDB.filter(function(p){ return (p.content+p.author+p.origin).indexOf(input)>-1; });
+                if(res.length>0) renderPoemUI(res[0]); else alert("没找到");
+            };
+            function renderPoemUI(poem) {
+                var box = document.getElementById('poem-container-box'); box.innerHTML = "";
+                document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
+                
+                // 图片显示
+                var imgEl = document.getElementById('poem-image');
+                if(poem.image) { imgEl.src = poem.image; imgEl.style.display = "block"; } else { imgEl.style.display = "none"; }
+
+                var lines = poem.content.split(/([，。？！])/).filter(function(s){return s&&s.trim()!==""});
+                var pinyins = poem.pinyin ? poem.pinyin.split(' ').filter(function(s){return s&&s.trim()!==""}) : [];
+                var pIdx = 0;
+                
+                for(var i=0; i<lines.length; i+=2) {
+                    var text = lines[i] + (lines[i+1]||"");
+                    var div = document.createElement('div'); div.className = "poem-line";
+                    
+                    if(pinyins.length === 0) {
+                        div.innerText = text;
+                    } else {
+                        var html = "";
+                        for(var j=0; j<text.length; j++) {
+                            var char = text[j];
+                            if("，。？！".indexOf(char)>-1) { html += char; pIdx++; }
+                            else { html += "<ruby>" + char + "<rt>" + (pinyins[pIdx]||"") + "</rt></ruby>"; pIdx++; }
+                        }
+                        div.innerHTML = html;
+                    }
+                    box.appendChild(div);
+                }
+            }
+
+            // --- 5. 成语逻辑 ---
+            window.loadDailyIdiom = function() {
+                try {
+                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+                    var item = myIdiomDB[dayOfYear % myIdiomDB.length];
+                    document.getElementById('idiom-word').innerHTML = item.w;
+                    document.getElementById('idiom-pinyin').innerHTML = item.p;
+                    document.getElementById('idiom-meaning').innerHTML = "<b>释义：</b>" + item.m;
+                    document.getElementById('idiom-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 每日成语";
+                } catch(e) { alert("成语数据有误"); }
+            };
+        };
+    </script>
+</body>
+</html>
