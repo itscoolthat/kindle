@@ -26,15 +26,13 @@
         .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
         .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 2px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
         
-        /* --- 闹钟 (修复版：增加壳子强制对齐) --- */
+        /* --- 闹钟 (已修复点点对齐) --- */
         .timer-spacer { padding-top: 80px; text-align: center; }
-        /* 容器居中 */
         #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
-        /* 关键修复：每个点的壳子，宽度5%，强制一行20个 */
+        /* 关键：给每个点加一个壳子，强制一行显示20个 */
         .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
-        /* 点本身的样式 */
         .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
-        .dot.passed { background-color: #e0e0e0; }
+        .dot.passed { background-color: #ddd; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
         
         .control-area { position: absolute; bottom: 0; width: 100%; height: 30%; border-top: 3px solid black; }
@@ -42,17 +40,19 @@
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 古诗页面 --- */
+        /* --- 古诗页面 (沉浸式背景) --- */
         #poem-bg-container {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            z-index: 1; opacity: 0.3; pointer-events: none; display: none; line-height: 0;
+            z-index: 1; /* 在最底层 */
+            opacity: 0.3; /* 透明度 */
+            pointer-events: none; display: none; line-height: 0;
         }
         #poem-bg-img { width: 100%; height: auto; display: block; }
         
         #poem-scroll-area {
             position: absolute; top: 70px; bottom: 0; width: 100%;
             overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2;
+            z-index: 2; /* 在图片上层 */
         }
         .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: sans-serif; } 
@@ -73,7 +73,7 @@
         <table class="main-layout">
             <tr class="row-home-time"><td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td></tr>
             <tr class="row-home-btn"><td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td><td class="btn-cell no-right" onclick="window.location.href='http://frogfind.com'">搜  索 ➚</td></tr>
-            <tr class="row-home-btn"><td class="btn-cell no-bottom" onclick="showPage('page-poetry')">每日古诗</td><td class="btn-cell no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td></tr>
+            <tr class="row-home-btn"><td class="btn-cell no-bottom" onclick="showPage('page-poetry')">随机古诗</td><td class="btn-cell no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td></tr>
         </table>
     </div>
 
@@ -98,7 +98,7 @@
         </div>
 
         <div id="poem-scroll-area">
-            <div id="poem-date">今日古诗</div>
+            <div id="poem-date">随机古诗</div>
             <div id="poem-container-box"></div>
             <div id="poem-info">...</div>
         </div>
@@ -116,7 +116,7 @@
 
     <script>
         // =======================================================
-        // 数据区
+        // 数据区 (已集成您的图片)
         // =======================================================
         var myPoemDB = [
             {
@@ -178,20 +178,17 @@
                 document.getElementById('home-page').className = 'hidden';
                 document.getElementById(id).className = 'sub-page-container';
                 if(id === 'page-timer') { if(document.getElementById('timer-grid').innerHTML==="") initTimerGrid(); }
-                if(id === 'page-poetry') loadDailyPoem();
+                if(id === 'page-poetry') loadRandomPoem(); // 改为随机
                 if(id === 'page-idiom') loadDailyIdiom();
             };
 
-            // 3. 闹钟 (修复版JS：创建带壳子的点)
+            // 3. 闹钟 (已修复点点对齐)
             var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
             window.initTimerGrid = function() {
                 var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
                 for(var i=0; i<60; i++) { 
-                    // 创建壳子
                     var w = document.createElement('div'); w.className = 'dot-wrapper'; 
-                    // 创建点
                     var d = document.createElement('div'); d.className='dot'; 
-                    // 组装
                     w.appendChild(d); 
                     grid.appendChild(w); 
                 }
@@ -209,13 +206,15 @@
                 for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
             };
 
-            // 4. 每日古诗
-            window.loadDailyPoem = function() {
+            // 4. 随机古诗 (每次点击都随机)
+            window.loadRandomPoem = function() {
                 try {
-                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
                     var db = myPoemDB;
-                    var poem = db[dayOfYear % db.length];
-                    document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
+                    // 随机取一个索引
+                    var randomIndex = Math.floor(Math.random() * db.length);
+                    var poem = db[randomIndex];
+                    
+                    document.getElementById('poem-date').innerHTML = "随机古诗";
                     renderPoemUI(poem);
                 } catch(e) {}
             };
@@ -252,7 +251,7 @@
                 }
             }
 
-            // 5. 每日成语
+            // 5. 每日成语 (保持按日期，如果想改随机也可以)
             window.loadDailyIdiom = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
