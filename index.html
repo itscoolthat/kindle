@@ -5,94 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
     <style>
-        /* --- 全局基础 --- */
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; 
-        }
+        /* --- 1. 全局基础 --- */
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; }
         .hidden { display: none !important; }
         td { text-align: center; vertical-align: middle; padding: 0; }
         
-        /* --- 首页布局：使用表格 (最稳) --- */
+        /* --- 2. 首页表格布局 (最稳) --- */
         table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
-        /* 时间区占 60% */
         .row-home-time { height: 60%; border-bottom: 3px solid black; }
-        /* 按钮区占 20% x 2 */
         .row-home-btn { height: 20%; }
 
         /* 按钮样式 */
-        .btn-cell { 
-            border-right: 1px solid black; 
-            border-bottom: 1px solid black; 
-            font-weight: bold; cursor: pointer; background: white; 
-            font-size: 26px;
-        }
+        .btn-cell { border-right: 1px solid black; border-bottom: 1px solid black; font-weight: bold; cursor: pointer; background: white; font-size: 26px; }
         .btn-cell:active { background: black; color: white; }
-        .no-right { border-right: none; } 
-        .no-bottom { border-bottom: none; }
+        .no-right { border-right: none; } .no-bottom { border-bottom: none; }
 
-        /* 时钟大字 */
+        /* 首页组件 */
         #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
         #date-display { font-size: 20px; margin-top: 15px; }
 
-        /* --- 子页面通用容器 --- */
-        .sub-page-container { 
-            width: 100%; height: 100%; 
-            background: white; 
-            position: absolute; top: 0; left: 0; z-index: 10; 
-            overflow: hidden; /* 防止滚动条撑破布局 */
-        }
+        /* --- 3. 子页面容器 --- */
+        .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
         
-        /* 返回按钮 (左上角) */
-        .nav-bar-fixed { 
-            position: absolute; top: 10px; left: 10px; 
-            padding: 8px 20px; 
-            border: 2px solid black; 
-            background: white; color: black; 
-            font-size: 20px; font-weight: bold; 
-            cursor: pointer; z-index: 100; 
-        }
-        
-        /* 内容区域 */
-        .content-area {
-            padding-top: 70px; /* 避开返回按钮 */
-            height: 100%;
-            box-sizing: border-box;
-            overflow-y: auto; /* 内容多了允许内部滚动 */
-            text-align: center;
+        /* 返回按钮 */
+        .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 1px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
+        .nav-bar-fixed:active { background: #eee; }
+
+        /* 内容区通用 */
+        .content-area { 
+            padding-top: 80px; height: 100%; box-sizing: border-box; 
+            overflow-y: auto; text-align: center; padding-left: 10px; padding-right: 10px; 
+            position: relative; z-index: 2; /* 保证文字在图片上层 */
         }
 
-        /* --- 1. 专注闹钟样式 --- */
-        #timer-grid { width: 90%; margin: 0 auto 10px auto; font-size: 0; }
-        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 4px; }
-        .dot.passed { background-color: #ddd; }
+        /* --- 4. 专注闹钟 --- */
+        #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 3px; }
+        .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
-        /* 闹钟控制区表格 */
-        table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        
         .control-area { position: absolute; bottom: 0; width: 100%; height: 30%; border-top: 3px solid black; }
+        table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 2. 古诗页面样式 --- */
-        #poem-date { 
-            display: inline-block; background: black; color: white; 
-            padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 4px; 
+        /* --- 5. 古诗页面 (含插画逻辑) --- */
+        /* 背景图容器：绝对定位到底部 */
+        #poem-bg-layer {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            opacity: 0.3; /* 透明度30% */
+            z-index: 1; /* 在文字下层 */
+            line-height: 0;
+            pointer-events: none;
         }
-        /* 图片样式 */
-        #poem-image { 
-            width: auto; max-width: 90%; height: auto; max-height: 200px;
-            margin-top: 20px; display: none; margin-left: auto; margin-right: auto;
-        }
-        /* 诗句样式 */
-        .poem-line { font-size: 34px; font-weight: bold; line-height: 2.0; margin: 5px 0; }
-        ruby { font-family: sans-serif; } 
-        rt { font-size: 12px; font-weight: normal; color: #555; }
-        #poem-info { font-size: 20px; color: #444; margin-top: 20px; margin-bottom: 40px; }
+        #poem-bg-img { width: 100%; height: auto; display: none; }
 
-        /* --- 3. 成语页面样式 --- */
+        #poem-date { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 4px; }
+        .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
+        ruby { font-family: sans-serif; } 
+        rt { font-size: 12px; font-weight: normal; color: #555; transform: translateY(-5px); }
+        #poem-info { font-size: 22px; color: #444; margin-top: 30px; margin-bottom: 100px; text-align: center; }
+
+        /* --- 6. 成语页面 --- */
         #idiom-word { font-size: 60px; font-weight: bold; margin-top: 30px; }
         #idiom-pinyin { font-size: 24px; color: #666; margin-bottom: 20px; font-family: monospace; }
-        #idiom-meaning { font-size: 24px; text-align: left; padding: 20px; border: 2px dashed #999; margin: 20px; }
+        #idiom-meaning { font-size: 24px; text-align: left; padding: 20px; border: 2px dashed #999; margin: 20px; background: rgba(255,255,255,0.8); }
 
     </style>
 </head>
@@ -101,14 +79,193 @@
     <div id="home-page" style="width:100%; height:100%;">
         <table class="main-layout">
             <tr class="row-home-time">
-                <td colspan="2">
-                    <div id="clock-display">00:00</div>
-                    <div id="date-display">正在启动...</div>
-                </td>
+                <td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td>
             </tr>
             <tr class="row-home-btn">
                 <td class="btn-cell" onclick="showPage('page-timer')">专注闹钟</td>
                 <td class="btn-cell no-right" onclick="window.location.href='http://frogfind.com'">搜  索 ➚</td>
             </tr>
             <tr class="row-home-btn">
-                <td class="btn
+                <td class="btn-cell no-bottom" onclick="showPage('page-poetry')">每日古诗</td>
+                <td class="btn-cell no-right no-bottom" onclick="showPage('page-idiom')">每日成语</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="page-timer" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
+        <div style="height: 70%; overflow: hidden; text-align: center;">
+            <div style="padding-top: 80px;"><div id="timer-grid"></div><div id="timer-val">25:00</div></div>
+        </div>
+        <div class="control-area">
+            <table class="control-layout">
+                <tr style="height: 50%;"><td class="preset-btn" onclick="setTimer(2)">2分</td><td class="preset-btn" onclick="setTimer(15)">15分</td><td class="preset-btn" onclick="setTimer(30)">30分</td><td class="preset-btn no-right" onclick="setTimer(60)">60分</td></tr>
+                <tr style="height: 50%;"><td class="action-btn no-bottom" id="btn-toggle" onclick="toggleTimer()">开始</td><td class="action-btn no-right no-bottom" onclick="resetTimer()">重置</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="page-poetry" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
+        
+        <div id="poem-bg-layer">
+            <img id="poem-bg-img" src="" alt="">
+        </div>
+
+        <div class="content-area">
+            <div id="poem-date">今日古诗</div>
+            <div id="poem-container-box"></div>
+            <div id="poem-info">...</div>
+        </div>
+    </div>
+
+    <div id="page-idiom" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
+        <div class="content-area">
+            <div style="background:black; color:white; padding:5px 15px; display:inline-block;">今日成语</div>
+            <div id="idiom-word">...</div>
+            <div id="idiom-pinyin">...</div>
+            <div id="idiom-meaning">...</div>
+        </div>
+    </div>
+
+    <script>
+        // =======================================================
+        // 数据区 (请在这里配置图片路径)
+        // =======================================================
+        var myPoemDB = [
+            {
+                origin: "回乡偶书", author: "贺知章 (唐)",
+                content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
+                pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
+                // 👇 图片填在这里，只要文件名
+                image: "images/huixiangoushu.png"
+            },
+            {
+                origin: "咏鹅", author: "骆宾王 (唐)",
+                content: "鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。",
+                pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。",
+                image: ""
+            },
+            { origin: "静夜思", author: "李白 (唐)", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。" },
+            { origin: "登鹳雀楼", author: "王之涣 (唐)", content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。", pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。" },
+            { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。 yè lái fēng yǔ shēng ， huā luò zhī duō shǎo 。" },
+            { origin: "悯农", author: "李绅 (唐)", content: "锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。", pinyin: "chú hé rì dāng wǔ ， hàn dī hé xià tǔ 。 shuí zhī pán zhōng cān ， lì lì jiē xīn kǔ 。" }
+        ];
+
+        var myIdiomDB = [
+            {w:"守株待兔", p:"shǒu zhū dài tù", m:"比喻死守狭隘经验，不知变通，或妄想不劳而获。"},
+            {w:"掩耳盗铃", p:"yǎn ěr dào líng", m:"比喻自己欺骗自己，明明掩盖不住的事情偏要想法子掩盖。"},
+            {w:"画蛇添足", p:"huà shé tiān zú", m:"比喻做了多余的事，非但无益，反而不合适。"},
+            {w:"亡羊补牢", p:"wáng yáng bǔ láo", m:"比喻出了问题以后想办法补救，可以防止继续受损失。"}
+        ];
+
+        // --- 逻辑区 ---
+        window.onload = function() {
+            // 1. 时钟
+            function updateClock() {
+                try {
+                    var now = new Date();
+                    var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    var beijingTime = new Date(utc + (3600000 * 8));
+                    var h = beijingTime.getHours(); var m = beijingTime.getMinutes();
+                    if(h<10) h="0"+h; if(m<10) m="0"+m;
+                    document.getElementById('clock-display').innerHTML = h + ":" + m;
+                    var mo = beijingTime.getMonth()+1; var d = beijingTime.getDate();
+                    var days = ["周日","周一","周二","周三","周四","周五","周六"];
+                    document.getElementById('date-display').innerHTML = mo+"月"+d+"日 · "+days[beijingTime.getDay()];
+                } catch(e) {}
+            }
+            updateClock(); setInterval(updateClock, 1000);
+
+            // 2. 页面控制
+            window.openLink = function(url) { window.location.href = url; };
+            window.goHome = function() {
+                var pages = ['page-timer', 'page-poetry', 'page-idiom'];
+                for(var i=0; i<pages.length; i++) { document.getElementById(pages[i]).className = 'hidden sub-page-container'; }
+                document.getElementById('home-page').className = '';
+            };
+            window.showPage = function(id) {
+                document.getElementById('home-page').className = 'hidden';
+                document.getElementById(id).className = 'sub-page-container';
+                if(id === 'page-timer') { if(document.getElementById('timer-grid').innerHTML==="") initTimerGrid(); }
+                if(id === 'page-poetry') loadDailyPoem();
+                if(id === 'page-idiom') loadDailyIdiom();
+            };
+
+            // 3. 闹钟
+            var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
+            window.initTimerGrid = function() {
+                var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
+                for(var i=0; i<60; i++) { var d = document.createElement('div'); d.className='dot'; grid.appendChild(d); }
+            };
+            window.setTimer = function(m) { window.pauseTimer(); timeLeft = m*60; totalTime = timeLeft; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
+            window.toggleTimer = function() { if(isRunning) { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="继续"; } else { window.startTimer(); document.getElementById('btn-toggle').innerHTML="暂停"; } };
+            window.startTimer = function() { if(isRunning) return; isRunning = true; timerInterval = setInterval(function() { if(timeLeft>0) { timeLeft--; updateTimerDisplay(); } else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="开始"; alert("时间到"); } }, 1000); };
+            window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML="开始"; };
+            window.updateTimerDisplay = function() {
+                var m = Math.floor(timeLeft/60); var s = timeLeft%60;
+                if(m<10) m="0"+m; if(s<10) s="0"+s;
+                document.getElementById('timer-val').innerHTML = m+":"+s;
+                var dots = document.getElementsByClassName('dot'); var grayCount = Math.floor(((totalTime-timeLeft)/totalTime)*60);
+                for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
+            };
+
+            // 4. 每日古诗 (修复背景图显示)
+            window.loadDailyPoem = function() {
+                try {
+                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+                    var db = myPoemDB;
+                    var poem = db[dayOfYear % db.length];
+                    document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
+                    renderPoemUI(poem);
+                } catch(e) {}
+            };
+            function renderPoemUI(poem) {
+                var box = document.getElementById('poem-container-box'); box.innerHTML = "";
+                document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
+                
+                // 图片逻辑：只修改 src 和 display
+                var bgImg = document.getElementById('poem-bg-img');
+                if(poem.image && poem.image !== "") { 
+                    bgImg.src = poem.image; 
+                    bgImg.style.display = "block"; 
+                } else { 
+                    bgImg.style.display = "none"; 
+                }
+
+                var lines = poem.content.split(/([，。？！])/).filter(function(s){return s&&s.trim()!==""});
+                var pinyins = poem.pinyin ? poem.pinyin.split(' ').filter(function(s){return s&&s.trim()!==""}) : [];
+                var pIdx = 0;
+                for(var i=0; i<lines.length; i+=2) {
+                    var text = lines[i] + (lines[i+1]||"");
+                    var div = document.createElement('div'); div.className = "poem-line";
+                    if(pinyins.length === 0) { div.innerText = text; } else {
+                        var html = "";
+                        for(var j=0; j<text.length; j++) {
+                            var char = text[j];
+                            if("，。？！".indexOf(char)>-1) { html += char; pIdx++; }
+                            else { html += "<ruby>" + char + "<rt>" + (pinyins[pIdx]||"") + "</rt></ruby>"; pIdx++; }
+                        }
+                        div.innerHTML = html;
+                    }
+                    box.appendChild(div);
+                }
+            }
+
+            // 5. 每日成语
+            window.loadDailyIdiom = function() {
+                try {
+                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+                    var item = myIdiomDB[dayOfYear % myIdiomDB.length];
+                    document.getElementById('idiom-word').innerHTML = item.w;
+                    document.getElementById('idiom-pinyin').innerHTML = item.p;
+                    document.getElementById('idiom-meaning').innerHTML = "<b>释义：</b>" + item.m;
+                    document.getElementById('idiom-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 每日成语";
+                } catch(e) {}
+            };
+        };
+    </script>
+</body>
+</html>
