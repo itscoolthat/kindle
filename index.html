@@ -26,30 +26,33 @@
         .sub-page-container { width: 100%; height: 100%; background: white; position: absolute; top:0; left:0; z-index:10; overflow: hidden; }
         .nav-bar-fixed { position: absolute; top: 15px; left: 15px; padding: 8px 20px; border: 2px solid black; background: white; color: black; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 100; }
         
-        /* --- 闹钟 --- */
+        /* --- 闹钟 (修复版：增加壳子强制对齐) --- */
         .timer-spacer { padding-top: 80px; text-align: center; }
-        #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; }
-        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; margin: 3px; }
-        .dot.passed { background-color: #ddd; }
+        /* 容器居中 */
+        #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
+        /* 关键修复：每个点的壳子，宽度5%，强制一行20个 */
+        .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
+        /* 点本身的样式 */
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
+        .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
+        
         .control-area { position: absolute; bottom: 0; width: 100%; height: 30%; border-top: 3px solid black; }
         table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 古诗页面 (沉浸式背景) --- */
+        /* --- 古诗页面 --- */
         #poem-bg-container {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            z-index: 1; /* 在最底层 */
-            opacity: 0.3; /* 透明度 */
-            pointer-events: none; display: none; line-height: 0;
+            z-index: 1; opacity: 0.3; pointer-events: none; display: none; line-height: 0;
         }
         #poem-bg-img { width: 100%; height: auto; display: block; }
         
         #poem-scroll-area {
             position: absolute; top: 70px; bottom: 0; width: 100%;
             overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2; /* 在图片上层 */
+            z-index: 2;
         }
         .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: sans-serif; } 
@@ -113,21 +116,19 @@
 
     <script>
         // =======================================================
-        // 数据区 (直接引用 GitHub 图片路径)
+        // 数据区
         // =======================================================
         var myPoemDB = [
             {
                 origin: "回乡偶书", author: "贺知章 (唐)",
                 content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
                 pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
-                // 之前上传的图
                 image: "images/huixiangoushu.png"
             },
             {
                 origin: "静夜思", author: "李白 (唐)",
                 content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。",
                 pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。",
-                // 👇👇👇 这里直接写你上传的文件名！ 👇👇👇
                 image: "images/jingyesi.png" 
             },
             {
@@ -181,11 +182,19 @@
                 if(id === 'page-idiom') loadDailyIdiom();
             };
 
-            // 3. 闹钟
+            // 3. 闹钟 (修复版JS：创建带壳子的点)
             var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
             window.initTimerGrid = function() {
                 var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
-                for(var i=0; i<60; i++) { var d = document.createElement('div'); d.className='dot'; grid.appendChild(d); }
+                for(var i=0; i<60; i++) { 
+                    // 创建壳子
+                    var w = document.createElement('div'); w.className = 'dot-wrapper'; 
+                    // 创建点
+                    var d = document.createElement('div'); d.className='dot'; 
+                    // 组装
+                    w.appendChild(d); 
+                    grid.appendChild(w); 
+                }
             };
             window.setTimer = function(m) { window.pauseTimer(); timeLeft = m*60; totalTime = timeLeft; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
             window.toggleTimer = function() { if(isRunning) { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="继续"; } else { window.startTimer(); document.getElementById('btn-toggle').innerHTML="暂停"; } };
@@ -200,14 +209,12 @@
                 for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
             };
 
-            // 4. 每日古诗 (正常按日期循环)
+            // 4. 每日古诗
             window.loadDailyPoem = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
                     var db = myPoemDB;
-                    // 每天自动换一首
                     var poem = db[dayOfYear % db.length];
-                    
                     document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
                     renderPoemUI(poem);
                 } catch(e) {}
@@ -216,7 +223,6 @@
                 var box = document.getElementById('poem-container-box'); box.innerHTML = "";
                 document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
                 
-                // 图片逻辑：读取 image 字段里的路径
                 var bgContainer = document.getElementById('poem-bg-container');
                 var bgImg = document.getElementById('poem-bg-img');
                 
