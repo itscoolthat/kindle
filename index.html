@@ -10,7 +10,7 @@
         .hidden { display: none !important; }
         td { text-align: center; vertical-align: middle; padding: 0; }
         
-        /* --- 2. 首页表格布局 --- */
+        /* --- 2. 首页表格布局 (最稳) --- */
         table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
         .row-home-time { height: 60%; border-bottom: 3px solid black; }
         .row-home-btn { height: 20%; }
@@ -37,16 +37,19 @@
         .preset-btn { border-right: 1px solid black; border-bottom: 1px solid black; font-size: 20px; font-weight: bold; cursor: pointer; }
         .action-btn { border-right: 1px solid black; font-size: 24px; font-weight: bold; cursor: pointer; }
 
-        /* --- 古诗页面 --- */
+        /* --- 古诗页面 (沉浸式背景) --- */
         #poem-bg-container {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            z-index: 1; opacity: 0.3; pointer-events: none; display: none; line-height: 0;
+            z-index: 1; /* 在最底层 */
+            opacity: 0.3; /* 透明度 */
+            pointer-events: none; display: none; line-height: 0;
         }
         #poem-bg-img { width: 100%; height: auto; display: block; }
+        
         #poem-scroll-area {
             position: absolute; top: 70px; bottom: 0; width: 100%;
             overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2;
+            z-index: 2; /* 在图片上层 */
         }
         .poem-line { font-size: 34px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: sans-serif; } 
@@ -110,20 +113,21 @@
 
     <script>
         // =======================================================
-        // 数据区
+        // 数据区 (直接引用 GitHub 图片路径)
         // =======================================================
         var myPoemDB = [
             {
                 origin: "回乡偶书", author: "贺知章 (唐)",
                 content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
                 pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
+                // 之前上传的图
                 image: "images/huixiangoushu.png"
             },
             {
                 origin: "静夜思", author: "李白 (唐)",
                 content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。",
                 pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。",
-                // 👇 请上传 jingyesi.png 到 images 文件夹
+                // 👇👇👇 这里直接写你上传的文件名！ 👇👇👇
                 image: "images/jingyesi.png" 
             },
             {
@@ -196,12 +200,12 @@
                 for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
             };
 
-            // 4. 每日古诗 (恢复正常逻辑：按日期循环)
+            // 4. 每日古诗 (正常按日期循环)
             window.loadDailyPoem = function() {
                 try {
                     var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
                     var db = myPoemDB;
-                    // 使用取模运算，每天换一首，自动循环
+                    // 每天自动换一首
                     var poem = db[dayOfYear % db.length];
                     
                     document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
@@ -212,6 +216,7 @@
                 var box = document.getElementById('poem-container-box'); box.innerHTML = "";
                 document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
                 
+                // 图片逻辑：读取 image 字段里的路径
                 var bgContainer = document.getElementById('poem-bg-container');
                 var bgImg = document.getElementById('poem-bg-img');
                 
