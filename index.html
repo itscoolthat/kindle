@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kindle学习台</title>
+    
+    <script src="poems.js"></script>
+    <script src="idioms.js"></script>
+    
     <style>
         /* --- 全局基础 --- */
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; }
@@ -47,15 +51,15 @@
         rt { font-size: 14px; font-weight: normal; color: #555; transform: translateY(-5px); }
         .date-badge { display: inline-block; background: black; color: white; padding: 5px 15px; font-size: 16px; margin-bottom: 20px; border-radius: 5px; }
         
-        /* 背景图样式：底部对齐，透明度30% */
+        /* 背景图样式 */
         .immersive-bg {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: auto; /* 保持比例 */
-            opacity: 0.3; /* 透明度 30% */
-            z-index: 1;   /* 在文字下面 */
+            height: auto;
+            opacity: 0.3;
+            z-index: 1;
             pointer-events: none;
             display: none;
         }
@@ -126,38 +130,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // 数据区 (已更新回乡偶书图片)
-        // ==========================================
-        var myPoemDB = [
-            {
-                origin: "回乡偶书", author: "贺知章 (唐)",
-                content: "少小离家老大回，乡音无改鬓毛衰。儿童相见不相识，笑问客从何处来。",
-                pinyin: "shào xiǎo lí jiā lǎo dà huí ， xiāng yīn wú gǎi bìn máo shuāi 。 ér tóng xiāng jiàn bù xiāng shí ， xiào wèn kè cóng hé chù lái 。",
-                // 👇 这里引用了你刚上传的图片
-                image: "images/huixiangoushu.png"
-            },
-            {
-                origin: "咏鹅", author: "骆宾王 (唐)",
-                content: "鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。",
-                pinyin: "é é é ， qū xiàng xiàng tiān gē 。 bái máo fú lǜ shuǐ ， hóng zhǎng bō qīng bō 。",
-                // 之前的Base64保留着也没事，或者你可以删掉换成 images/goose.png
-                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDY0IDQ0OGgtNTUuMjNIMzkydjMyYzAgOC44NC03LjE2IDE2LTE2IDE2aC0zMmMtOC44NCAwLTE2LTcuMTYtMTYtMTZ2LTMySDk2di0zMmMwLTMzLjA5IDI1LjQyLTYwLjI5IDU4LTYyLjkzVjM1MmMwLTUzLjA0IDQyLjk2LTk2IDk2LTk2aDMxLjM1Yzc5Ljg0IDAgMTQ0Ljg4LTYyLjg0IDE0OC40MS0xNDEuMTlMNDMzLjY1IDk2SDQ2NGExNiAxNiAwIDAgMCAxNi0xNlY0OGExNiAxNiAwIDAgMC0xNi0xNkgxNzZhMTYgMTYgMCAwIDAtMTYgMTZ2MzJhMTYgMTYgMCAwIDAgMTYgMTZoMTA5LjkxYy0xNC44MiA2MS4zLTc0LjUgMTA1LjI1LTE0MS45MSAxMDUuMjVoLTMwYy04MC44OSAwLTE0Ni44IDYyLjg5LTE1MS44NCAxNDIuNTVDMTkuMTEgMzc5LjQyIDAgNDI3LjY1IDAgNDgwYTE2IDE2IDAgMCAwIDE2IDE2aDM2OGE0OCA0OCAwIDAgMCA0OC00OGgzMmExNiAxNiAwIDAgMCAxNi0xNnYtMzJhMTYgMTYgMCAwIDAtMTYtMTZ6TTI1NiAyODhjLTI2LjUxIDAtNDgtMjEuNDktNDgtNDhzMjEuNDktNDggNDgtNDggNDggMjEuNDkgNDggNDggNDggNDggNDggNDh6Ii8+PC9zdmc+"
-            },
-            { origin: "静夜思", author: "李白 (唐)", content: "床前明月光，疑是地上霜。举头望明月，低头思故乡。", pinyin: "chuáng qián míng yuè guāng ， yí shì dì shàng shuāng 。 jǔ tóu wàng míng yuè ， dī tóu sī gù xiāng 。" },
-            { origin: "登鹳雀楼", author: "王之涣 (唐)", content: "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。", pinyin: "bái rì yī shān jìn ， huáng hé rù hǎi liú 。 yù qióng qiān lǐ mù ， gèng shàng yī céng lóu 。" },
-            { origin: "春晓", author: "孟浩然 (唐)", content: "春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。", pinyin: "chūn mián bù jué xiǎo ， chù chù wén tí niǎo 。 yè lái fēng yǔ shēng ， huā luò zhī duō shǎo 。" },
-            { origin: "悯农", author: "李绅 (唐)", content: "锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。", pinyin: "chú hé rì dāng wǔ ， hàn dī hé xià tǔ 。 shuí zhī pán zhōng cān ， lì lì jiē xīn kǔ 。" }
-        ];
-
-        var myIdiomDB = [
-            {w:"守株待兔", p:"shǒu zhū dài tù", m:"比喻死守狭隘经验，不知变通，或妄想不劳而获。"},
-            {w:"掩耳盗铃", p:"yǎn ěr dào líng", m:"比喻自己欺骗自己，明明掩盖不住的事情偏要想法子掩盖。"},
-            {w:"画蛇添足", p:"huà shé tiān zú", m:"比喻做了多余的事，非但无益，反而不合适。"},
-            {w:"亡羊补牢", p:"wáng yáng bǔ láo", m:"比喻出了问题以后想办法补救，可以防止继续受损失。"}
-        ];
-
-        // --- 逻辑区 ---
         window.onload = function() {
             // 1. 时钟
             function updateClock() {
@@ -171,4 +143,101 @@
                     var mo = beijingTime.getMonth()+1; var d = beijingTime.getDate();
                     var days = ["周日","周一","周二","周三","周四","周五","周六"];
                     document.getElementById('date-display').innerHTML = mo+"月"+d+"日 · "+days[beijingTime.getDay()];
-                } catch(e) { document.getElementById
+                } catch(e) { document.getElementById('clock-display').innerHTML = "Error"; }
+            }
+            updateClock(); setInterval(updateClock, 1000);
+
+            // 2. 页面控制
+            window.openLink = function(url) { window.location.href = url; };
+            window.goHome = function() {
+                var pages = ['page-timer', 'page-poetry', 'page-idiom'];
+                for(var i=0; i<pages.length; i++) { document.getElementById(pages[i]).className = 'hidden sub-page-container'; }
+                document.getElementById('home-page').className = '';
+            };
+            window.showPage = function(id) {
+                document.getElementById('home-page').className = 'hidden';
+                document.getElementById(id).className = 'sub-page-container';
+                if(id === 'page-timer') { if(document.getElementById('timer-grid').innerHTML==="") initTimerGrid(); }
+                if(id === 'page-poetry') loadDailyPoem();
+                if(id === 'page-idiom') loadDailyIdiom();
+            };
+
+            // 3. 闹钟
+            var timerInterval = null; var timeLeft = 1500; var totalTime = 1500; var isRunning = false;
+            window.initTimerGrid = function() {
+                var grid = document.getElementById('timer-grid'); grid.innerHTML = "";
+                for(var i=0; i<60; i++) { var d = document.createElement('div'); d.className='dot'; grid.appendChild(d); }
+            };
+            window.setTimer = function(m) { window.pauseTimer(); timeLeft = m*60; totalTime = timeLeft; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
+            window.toggleTimer = function() { if(isRunning) { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="继续"; } else { window.startTimer(); document.getElementById('btn-toggle').innerHTML="暂停"; } };
+            window.startTimer = function() { if(isRunning) return; isRunning = true; timerInterval = setInterval(function() { if(timeLeft>0) { timeLeft--; updateTimerDisplay(); } else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML="开始"; alert("时间到"); } }, 1000); };
+            window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML="开始"; };
+            window.updateTimerDisplay = function() {
+                var m = Math.floor(timeLeft/60); var s = timeLeft%60;
+                if(m<10) m="0"+m; if(s<10) s="0"+s;
+                document.getElementById('timer-val').innerHTML = m+":"+s;
+                var dots = document.getElementsByClassName('dot');
+                var grayCount = Math.floor(((totalTime-timeLeft)/totalTime)*60);
+                for(var i=0; i<60; i++) { if(i<grayCount) dots[i].className="dot passed"; else dots[i].className="dot"; }
+            };
+
+            // 4. 古诗
+            window.loadDailyPoem = function() {
+                try {
+                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+                    // 读取外部的 poems.js
+                    var db = window.myPoemDB || [{content:"数据加载中..."}];
+                    var poem = db[dayOfYear % db.length];
+                    document.getElementById('poem-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 今日古诗";
+                    renderPoemUI(poem);
+                } catch(e) { alert("古诗加载失败"); }
+            };
+            function renderPoemUI(poem) {
+                var box = document.getElementById('poem-container-box'); box.innerHTML = "";
+                document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
+                
+                var bgImgEl = document.getElementById('poem-bg-image');
+                if(poem.image && poem.image !== "") { 
+                    bgImgEl.src = poem.image; 
+                    bgImgEl.style.display = "block"; 
+                } else { 
+                    bgImgEl.style.display = "none"; 
+                }
+
+                var lines = poem.content.split(/([，。？！])/).filter(function(s){return s&&s.trim()!==""});
+                var pinyins = poem.pinyin ? poem.pinyin.split(' ').filter(function(s){return s&&s.trim()!==""}) : [];
+                var pIdx = 0;
+                for(var i=0; i<lines.length; i+=2) {
+                    var text = lines[i] + (lines[i+1]||"");
+                    var div = document.createElement('div'); div.className = "poem-line";
+                    if(pinyins.length === 0) { div.innerText = text; } else {
+                        var html = "";
+                        for(var j=0; j<text.length; j++) {
+                            var char = text[j];
+                            if("，。？！".indexOf(char)>-1) { html += char; pIdx++; }
+                            else { html += "<ruby>" + char + "<rt>" + (pinyins[pIdx]||"") + "</rt></ruby>"; pIdx++; }
+                        }
+                        div.innerHTML = html;
+                    }
+                    box.appendChild(div);
+                }
+            }
+
+            // 5. 成语
+            window.loadDailyIdiom = function() {
+                try {
+                    var today = new Date(); var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+                    // 读取外部的 idioms.js
+                    var db = window.myIdiomDB || [{w:"加载中"}];
+                    var item = db[dayOfYear % db.length];
+                    document.getElementById('idiom-word').innerHTML = item.w;
+                    document.getElementById('idiom-pinyin').innerHTML = item.p;
+                    document.getElementById('idiom-meaning').innerHTML = "<b>释义：</b>" + item.m;
+                    document.getElementById('idiom-date').innerHTML = (today.getMonth()+1)+"月"+today.getDate()+"日 · 每日成语";
+                } catch(e) { alert("成语加载失败"); }
+            };
+        };
+    </script>
+</body>
+</html>
