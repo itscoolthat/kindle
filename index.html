@@ -33,35 +33,28 @@
         .no-right { border-right: none; } .no-bottom { border-bottom: none; }
         .home-btn-font { font-size: 26px; } .preset-btn-font { font-size: 20px; } .action-btn-font { font-size: 26px; }
 
-        /* --- 5. 通用组件与返回按钮 (修改版) --- */
+        /* --- 5. 通用组件与返回按钮 (极简版) --- */
         .sub-page-container { width: 100%; height: 100%; background: white; position: relative; }
         
-        /* 新版返回按钮：左上角大方块 */
+        /* 修改点1：极简返回按钮 */
         .nav-bar-fixed { 
             position: absolute; 
             top: 15px; 
             left: 15px; 
-            width: auto; /* 宽度自适应 */
-            height: auto;
-            padding: 10px 25px; /* 内边距做大点 */
-            border: 3px solid black; /* 粗边框 */
+            padding: 8px 20px; 
+            border: 1px solid black; /* 最细边框 */
             background: white; 
             color: black; 
-            font-size: 22px; 
+            font-size: 20px; 
             font-weight: bold; 
             cursor: pointer; 
             z-index: 100;
-            box-shadow: 2px 2px 0px #ccc; /* 稍微加点阴影增加立体感 */
+            box-shadow: none; /* 去掉阴影 */
         }
-        .nav-bar-fixed:active {
-            background: black;
-            color: white;
-            box-shadow: none;
-        }
+        .nav-bar-fixed:active { background: #eee; } /* 按下稍微变灰 */
 
-        /* 内容容器：增加了顶部留白，防止被大按钮挡住 */
         .content-box-padded { 
-            padding-top: 90px; /* 从50改到90 */
+            padding-top: 80px; 
             text-align: center; 
             padding-left: 10px; 
             padding-right: 10px; 
@@ -69,7 +62,6 @@
             box-sizing: border-box;
         }
         
-        /* 闹钟页面的顶部留白也对应增加 */
         .timer-spacer { padding-top: 80px; }
 
         /* 时钟 */
@@ -82,22 +74,44 @@
         .dot.passed { background-color: #e0e0e0; }
         #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
 
-        /* 古诗页面样式 */
+        /* === 古诗页面样式 (修正版) === */
         #poem-scroll-area {
-            position: absolute; top: 80px; /* 避开返回按钮 */
-            bottom: 80px; width: 100%;
+            position: absolute; top: 70px; bottom: 70px; /* 上下留白 */
+            width: 100%;
             overflow-y: auto;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         #poem-image { width: 120px; height: 120px; margin-bottom: 20px; display: none; margin-top: 10px;}
-        .poem-line { font-size: 36px; font-weight: bold; line-height: 2.0; margin: 5px 0; white-space: nowrap; }
+        .poem-line { font-size: 36px; font-weight: bold; line-height: 2.2; margin: 0; white-space: nowrap; }
         ruby { font-family: "Courier New", serif; } 
         rt { font-size: 14px; font-weight: normal; color: #555; transform: translateY(-5px); }
-        #poem-info { font-size: 20px; color: #444; margin-top: 20px; margin-bottom: 20px; }
         
-        .poem-control-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; border-top: 2px solid black; display: flex; }
-        .poem-btn { flex: 1; height: 100%; font-size: 24px; font-weight: bold; border-right: 1px solid black; background: white; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .poem-btn:last-child { border-right: none; }
+        /* 修改点2：作者信息样式 (去掉破折号，居中) */
+        #poem-info { 
+            font-size: 22px; 
+            color: #444; 
+            margin-top: 30px; 
+            margin-bottom: 20px; 
+            text-align: center; /* 强制居中 */
+        }
+
+        /* 修改点3：底部按钮样式 (回归简单) */
+        .poem-control-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; /* 高度适中 */
+            border-top: 1px solid black; /* 细边框 */
+            display: flex;
+        }
+        .poem-btn {
+            flex: 1; 
+            height: 100%;
+            font-size: 22px; 
+            font-weight: bold;
+            border-right: 1px solid black; /* 中间分割线 */
+            background: white;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+        .poem-btn:last-child { border-right: none; } /* 去掉最后一个按钮右边的线 */
         .poem-btn:active { background: black; color: white; }
 
         /* 每日成语页面样式 */
@@ -127,7 +141,7 @@
     </div>
 
     <div id="page-timer" class="hidden sub-page-container">
-        <div class="nav-bar-fixed" onclick="goHome()">⬅ 主页</div>
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         <table class="timer-layout">
             <tr class="row-timer-display">
                 <td>
@@ -142,7 +156,7 @@
     </div>
 
     <div id="page-poetry" class="hidden sub-page-container">
-        <div class="nav-bar-fixed" onclick="goHome()">⬅ 主页</div>
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         
         <div id="poem-scroll-area">
             <img id="poem-image" src="" alt="插画">
@@ -157,7 +171,7 @@
     </div>
 
     <div id="page-idiom" class="hidden sub-page-container">
-        <div class="nav-bar-fixed" onclick="goHome()">⬅ 主页</div>
+        <div class="nav-bar-fixed" onclick="goHome()">返 回</div>
         <div class="content-box-padded">
             <div id="idiom-date" class="date-badge">今日成语</div>
             <div id="idiom-word">...</div>
@@ -211,7 +225,10 @@
             }
             function renderPoemUI(poem) {
                 var container = document.getElementById('poem-container-box'); container.innerHTML = "";
-                document.getElementById('poem-info').innerHTML = "— " + poem.author + " · " + poem.origin;
+                
+                // 修改：只显示 "作者 · 朝代"，没有破折号
+                document.getElementById('poem-info').innerHTML = poem.author + " · " + poem.origin;
+                
                 var imgEl = document.getElementById('poem-image');
                 if (poem.image && poem.image !== "") { imgEl.src = poem.image; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; imgEl.src = ""; }
                 var lines = poem.content.split(/([，。？！])/).filter(function(s){ return s && s.trim() !== ""; });
@@ -241,9 +258,4 @@
             window.toggleTimer = function() { var btn = document.getElementById('btn-toggle'); if (isRunning) { window.pauseTimer(); btn.innerHTML = "继续"; } else { window.startTimer(); btn.innerHTML = "暂停"; } };
             window.startTimer = function() { if (isRunning) return; isRunning = true; timerInterval = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); } else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML = "开始"; alert("时间到！"); } }, 1000); };
             window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
-            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
-            window.updateTimerDisplay = function() { var m = Math.floor(timeLeft / 60); var s = timeLeft % 60; if (m < 10) m = '0' + m; if (s < 10) s = '0' + s; document.getElementById('timer-val').innerHTML = m + ':' + s; var dots = document.getElementsByClassName('dot'); var totalDots = 60; if (totalTime <= 0) totalTime = 1; var timePassed = totalTime - timeLeft; var grayCount = Math.floor((timePassed / totalTime) * totalDots); for(var i=0; i<totalDots; i++) { if (i < grayCount) dots[i].className = 'dot passed'; else dots[i].className = 'dot'; } };
-        };
-    </script>
-</body>
-</html>
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始
