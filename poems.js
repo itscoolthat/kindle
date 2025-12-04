@@ -1,23 +1,158 @@
-// 这里专门放古诗，随便改，不会弄坏主页
-window.myPoemDB = [
-    { content: "白日依山尽，黄河入海流。", origin: "登鹳雀楼", author: "王之涣" },
-    { content: "欲穷千里目，更上一层楼。", origin: "登鹳雀楼", author: "王之涣" },
-    { content: "鹅鹅鹅，曲项向天歌。", origin: "咏鹅", author: "骆宾王" },
-    { content: "举头望明月，低头思故乡。", origin: "静夜思", author: "李白" },
-    { content: "春眠不觉晓，处处闻啼鸟。", origin: "春晓", author: "孟浩然" },
-    { content: "夜来风雨声，花落知多少。", origin: "春晓", author: "孟浩然" },
-    { content: "松下问童子，言师采药去。", origin: "寻隐者不遇", author: "贾岛" },
-    { content: "只在此山中，云深不知处。", origin: "寻隐者不遇", author: "贾岛" },
-    { content: "谁知盘中餐，粒粒皆辛苦。", origin: "悯农", author: "李绅" },
-    { content: "红豆生南国，春来发几枝。", origin: "相思", author: "王维" },
-    { content: "愿君多采撷，此物最相思。", origin: "相思", author: "王维" },
-    { content: "野火烧不尽，春风吹又生。", origin: "赋得古原草送别", author: "白居易" },
-    { content: "海内存知己，天涯若比邻。", origin: "送杜少府之任蜀州", author: "王勃" },
-    { content: "海上生明月，天涯共此时。", origin: "望月怀远", author: "张九龄" },
-    { content: "迟日江山丽，春风花草香。", origin: "绝句", author: "杜甫" },
-    { content: "孤帆远影碧空尽，唯见长江天际流。", origin: "送孟浩然之广陵", author: "李白" },
-    { content: "少小离家老大回，乡音无改鬓毛衰。", origin: "回乡偶书", author: "贺知章" },
-    { content: "不知细叶谁裁出，二月春风似剪刀。", origin: "咏柳", author: "贺知章" },
-    { content: "两个黄鹂鸣翠柳，一行白鹭上青天。", origin: "绝句", author: "杜甫" },
-    { content: "窗含西岭千秋雪，门泊东吴万里船。", origin: "绝句", author: "杜甫" }
-];
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kindle学习台</title>
+    <script src="poems.js"></script>
+    <style>
+        /* --- 1. 全局基础 --- */
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: white; color: black; font-family: Arial, sans-serif; }
+        .hidden { display: none !important; }
+        td { text-align: center; vertical-align: middle; padding: 0; }
+        /* 布局表格 */
+        table.main-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-home-time { height: 60%; border-bottom: 3px solid black; }
+        .row-home-btn { height: 20%; }
+        table.timer-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-timer-display { height: 70%; }
+        .row-timer-control { height: 30%; border-top: 3px solid black; }
+        table.control-layout { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+        .row-control-preset { height: 50%; }
+        .row-control-action { height: 50%; }
+        /* 按钮样式 */
+        .btn-cell { border-right: 1px solid black; border-bottom: 1px solid black; font-weight: bold; cursor: pointer; background: white; text-align: center; vertical-align: middle; }
+        .btn-cell:active { background: black; color: white; }
+        .no-right { border-right: none; } .no-bottom { border-bottom: none; }
+        .home-btn-font { font-size: 26px; } .preset-btn-font { font-size: 20px; } .action-btn-font { font-size: 26px; }
+        /* 通用组件 */
+        .sub-page-container { width: 100%; height: 100%; background: white; position: relative; }
+        .nav-bar-fixed { position: absolute; top: 0; left: 0; width: 100%; height: 40px; line-height: 40px; background: black; color: white; font-size: 18px; padding-left: 10px; font-weight: bold; cursor: pointer; z-index: 100; }
+        .content-box-padded { padding-top: 50px; text-align: center; padding-left: 20px; padding-right: 20px;}
+        /* 时钟 */
+        #clock-display { font-size: 100px; font-weight: bold; line-height: 1; }
+        #date-display { font-size: 20px; margin-top: 15px; }
+        /* 闹钟点阵 */
+        #timer-grid { width: 96%; margin: 0 auto 10px auto; font-size: 0; text-align: center; }
+        .dot-wrapper { display: inline-block; width: 5%; height: 20px; vertical-align: middle; text-align: center; }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: black; vertical-align: middle; }
+        .dot.passed { background-color: #e0e0e0; }
+        #timer-val { font-size: 100px; font-weight: bold; margin: 0; line-height: 1.2; }
+
+        /* === 古诗页面专用样式 (带插画版) === */
+        /* 诗句容器：用 Flex 布局来实现左图右文，或者上图下文 */
+        .poem-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80%;
+        }
+        /* 插画样式 */
+        #poem-image {
+            width: 150px; height: 150px; /* 控制图片大小，不要太大 */
+            margin-bottom: 20px;
+            display: none; /* 默认隐藏，有图时再显示 */
+        }
+        #poem-content { font-size: 40px; font-weight: bold; line-height: 1.3; margin: 10px 0; }
+        #poem-info { font-size: 22px; color: #444; font-style: normal; }
+        .refresh-btn { margin-top: 30px; padding: 10px 30px; font-size: 22px; border: 2px solid black; background: white; cursor: pointer; font-weight: bold; }
+        .refresh-btn:active { background: black; color: white; }
+    </style>
+</head>
+<body>
+    <div id="home-page" style="width:100%; height:100%;">
+        <table class="main-layout">
+            <tr class="row-home-time">
+                <td colspan="2"><div id="clock-display">00:00</div><div id="date-display">正在启动...</div></td>
+            </tr>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
+                <td class="btn-cell home-btn-font no-right" onclick="openLink('https://simple.m.wikipedia.org')">维基百科 ➚</td>
+            </tr>
+            <tr class="row-home-btn">
+                <td class="btn-cell home-btn-font no-bottom" onclick="showPage('page-poetry')">古诗赏析</td>
+                <td class="btn-cell home-btn-font no-right no-bottom" onclick="openLink('https://ankiuser.net/study')">Anki 记忆卡 ➚</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="page-timer" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <table class="timer-layout">
+            <tr class="row-timer-display"><td><div style="padding-top: 30px;"><div id="timer-grid"></div><div id="timer-val">25:00</div></div></td></tr>
+            <tr class="row-timer-control"><td><table class="control-layout"><tr class="row-control-preset"><td class="btn-cell preset-btn-font" onclick="setTimer(2)">2分</td><td class="btn-cell preset-btn-font" onclick="setTimer(15)">15分</td><td class="btn-cell preset-btn-font" onclick="setTimer(30)">30分</td><td class="btn-cell preset-btn-font no-right" onclick="setTimer(60)">60分</td></tr><tr class="row-control-action"><td class="btn-cell action-btn-font no-bottom" id="btn-toggle" onclick="toggleTimer()">开始</td><td class="btn-cell action-btn-font no-right no-bottom" onclick="resetTimer()">重置</td></tr></table></td></tr>
+        </table>
+    </div>
+
+    <div id="page-poetry" class="hidden sub-page-container">
+        <div class="nav-bar-fixed" onclick="goHome()"> < 返回 </div>
+        <div class="content-box-padded">
+            <div class="poem-container">
+                <img id="poem-image" src="" alt="插画">
+                <div id="poem-content">正在取诗...</div>
+                <div id="poem-info">...</div>
+            </div>
+            <button class="refresh-btn" onclick="fetchPoem()">换一首</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            function updateClock() { try { var now = new Date(); var utc = now.getTime() + (now.getTimezoneOffset() * 60000); var beijingTime = new Date(utc + (3600000 * 8)); var h = beijingTime.getHours(); var m = beijingTime.getMinutes(); if (h < 10) h = '0' + h; if (m < 10) m = '0' + m; document.getElementById('clock-display').innerHTML = h + ':' + m; var mo = beijingTime.getMonth() + 1; var d = beijingTime.getDate(); var days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]; document.getElementById('date-display').innerHTML = mo + '月' + d + '日 · ' + days[beijingTime.getDay()]; } catch(e) {} }
+            updateClock(); setInterval(updateClock, 1000);
+
+            window.openLink = function(url) { window.location.href = url; };
+            window.goHome = function() { document.getElementById('page-timer').className = 'hidden sub-page-container'; document.getElementById('page-poetry').className = 'hidden sub-page-container'; document.getElementById('home-page').className = ''; };
+            window.showPage = function(id) {
+                document.getElementById('home-page').className = 'hidden'; document.getElementById(id).className = 'sub-page-container';
+                if(id === 'page-timer' && document.getElementById('timer-grid').innerHTML === "") { initTimerGrid(); updateTimerDisplay(); }
+                if(id === 'page-poetry') { fetchPoem(); }
+            };
+
+            // --- 古诗逻辑 (含图片处理) ---
+            window.fetchPoem = function() {
+                var contentEl = document.getElementById('poem-content'); var infoEl = document.getElementById('poem-info'); var imgEl = document.getElementById('poem-image');
+                contentEl.innerHTML = "正在取诗..."; infoEl.innerHTML = "..."; imgEl.style.display = 'none'; // 先隐藏图片
+
+                var xhr = new XMLHttpRequest(); xhr.open('GET', 'https://v1.jinrishici.com/all.json', true); xhr.timeout = 2000;
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) { try { var data = JSON.parse(xhr.responseText); 
+                            // API 成功：只显示文字，隐藏图片（因为API不返回图片）
+                            contentEl.innerHTML = data.content; infoEl.innerHTML = "— " + data.author + " · " + data.origin; imgEl.style.display = 'none';
+                        } catch(e) { showLocalPoem(); } } else { showLocalPoem(); }
+                    }
+                };
+                xhr.ontimeout = function () { showLocalPoem(); }; xhr.onerror = function () { showLocalPoem(); }; xhr.send();
+            };
+
+            function showLocalPoem() {
+                var poemDB = window.myPoemDB;
+                if (!poemDB || poemDB.length === 0) poemDB = [{ content: "白日依山尽，黄河入海流。", origin: "登鹳雀楼", author: "王之涣" }];
+                var r = Math.floor(Math.random() * poemDB.length);
+                var poem = poemDB[r];
+                
+                document.getElementById('poem-content').innerHTML = poem.content;
+                document.getElementById('poem-info').innerHTML = "— " + poem.author + " · " + poem.origin;
+                var imgEl = document.getElementById('poem-image');
+                
+                // 核心逻辑：如果有图片数据，就显示；没有就隐藏
+                if (poem.image && poem.image !== "") {
+                    imgEl.src = poem.image;
+                    imgEl.style.display = 'block'; // 显示图片
+                } else {
+                    imgEl.style.display = 'none'; // 隐藏图片
+                    imgEl.src = ""; // 清空来源
+                }
+            }
+
+            // --- 闹钟逻辑 ---
+            var timerInterval = null; var defaultTime = 25 * 60; var timeLeft = defaultTime; var totalTime = defaultTime; var isRunning = false;
+            window.initTimerGrid = function() { var grid = document.getElementById('timer-grid'); grid.innerHTML = ""; for(var i=0; i<60; i++) { var wrapper = document.createElement('div'); wrapper.className = 'dot-wrapper'; var dot = document.createElement('div'); dot.className = 'dot'; wrapper.appendChild(dot); grid.appendChild(wrapper); } };
+            window.setTimer = function(minutes) { window.pauseTimer(); timeLeft = minutes * 60; totalTime = timeLeft; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
+            window.toggleTimer = function() { var btn = document.getElementById('btn-toggle'); if (isRunning) { window.pauseTimer(); btn.innerHTML = "继续"; } else { window.startTimer(); btn.innerHTML = "暂停"; } };
+            window.startTimer = function() { if (isRunning) return; isRunning = true; timerInterval = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); } else { window.pauseTimer(); document.getElementById('btn-toggle').innerHTML = "开始"; alert("时间到！"); } }, 1000); };
+            window.pauseTimer = function() { clearInterval(timerInterval); isRunning = false; };
+            window.resetTimer = function() { window.pauseTimer(); timeLeft = totalTime; updateTimerDisplay(); document.getElementById('btn-toggle').innerHTML = "开始"; };
+            window.updateTimerDisplay = function() { var m = Math.floor(timeLeft / 60); var s = timeLeft % 60; if (m < 10) m = '0' + m; if (s < 10) s = '0' + s; document.getElementById('timer-val').innerHTML = m + ':' + s; var dots = document.getElementsByClassName('dot'); var totalDots = 60; if (totalTime <= 0) totalTime = 1; var timePassed = totalTime - timeLeft; var grayCount = Math.floor((timePassed / totalTime) * totalDots); for(var i=0; i<totalDots; i++) { if (i < grayCount) dots[i].className = 'dot passed'; else dots[i].className = 'dot'; } };
+        };
+    </script>
+</body>
+</html>
