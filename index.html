@@ -75,7 +75,7 @@
             </tr>
             <tr class="row-home-btn">
                 <td class="btn-cell home-btn-font" onclick="showPage('page-timer')">专注闹钟</td>
-                <td class="btn-cell home-btn-font no-right" onclick="openLink('http://frogfind.com')">搜  索 ➚</td>
+                <td class="btn-cell home-btn-font no-right" onclick="openLink('http://frogfind.com')">搜  索</td>
             </tr>
             <tr class="row-home-btn">
                 <td class="btn-cell home-btn-font no-bottom" onclick="showPage('page-poetry')">古诗赏析</td>
@@ -157,16 +157,53 @@
                 document.getElementById('idiom-date').innerHTML = (today.getMonth()+1) + "月" + today.getDate() + "日 · 每日成语";
             };
 
-            // --- 搜索古诗逻辑 ---
+                // --- 修复后的搜索逻辑 ---
             window.searchPoem = function() {
                 var input = document.getElementById('search-input').value;
                 if (!input) { alert("请输入关键字"); return; }
-                var poemDB = window.myPoemDB || [];
-                var results = poemDB.filter(function(p) { return p.content.indexOf(input) !== -1 || p.author.indexOf(input) !== -1 || p.origin.indexOf(input) !== -1; });
+                
+                // 去除前后空格，防止误操作
+                input = input.trim(); 
+                
+                // 确保数据源存在，如果不存在就用兜底数据
+                var poemDB = window.myPoemDB;
+                if (!poemDB || poemDB.length === 0) {
+                    poemDB = [
+                        { content: "白日依山尽，黄河入海流。", origin: "登鹳雀楼", author: "王之涣" },
+                        { content: "举头望明月，低头思故乡。", origin: "静夜思", author: "李白" }
+                    ];
+                }
+
+                // 核心搜索算法：模糊匹配
+                var results = poemDB.filter(function(p) {
+                    // 把所有相关信息拼在一起搜，只要沾边就算搜到
+                    var allText = p.content + p.author + p.origin;
+                    return allText.indexOf(input) !== -1;
+                });
+
                 if (results.length > 0) {
-                    renderPoemUI(results[0]);
-                    if(results.length > 1) { document.getElementById('poem-info').innerHTML += " (还有" + (results.length-1) + "首)"; }
-                } else { alert("本地库里没找到: " + input); }
+                    // 找到了！显示第一条
+                    var p = results[0];
+                    document.getElementById('poem-content').innerHTML = p.content;
+                    document.getElementById('poem-info').innerHTML = "— " + p.author + " · " + p.origin;
+                    
+                    // 如果有图就显示图
+                    var imgEl = document.getElementById('poem-image');
+                    if (p.image && p.image !== "") {
+                        imgEl.src = p.image;
+                        imgEl.style.display = 'block';
+                    } else {
+                        imgEl.style.display = 'none';
+                    }
+
+                    // 如果搜到多首，提示一下
+                    if(results.length > 1) { 
+                        alert("找到了 " + results.length + " 首相关的诗，已显示第一首。");
+                    }
+                } else {
+                    // 没找到时的详细提示
+                    alert("没找到: " + input + "\n当前诗库共有: " + poemDB.length + " 首");
+                }
             };
 
             // --- 随机古诗逻辑 ---
